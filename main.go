@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -24,6 +26,10 @@ func move(board [][]int, blank []int, direction string) [][]int {
 	fmt.Println(board[0])
 	fmt.Println(board[1])
 	fmt.Println(board[2])
+
+	fmt.Println("Start Random")
+	fmt.Println(randomPuzzle(board, blank))
+	fmt.Println("End Random")
 
 	if canMove(blank, dir) {
 
@@ -111,4 +117,38 @@ func checkidentical(temp1 [3][3]int, temp2 [3][3]int) bool {
 		}
 	}
 	return true
+}
+
+func randomPuzzle(board [][]int, b []int) ([][]int, []int) {
+	//Random Number
+	seed1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(seed1)
+	randomnumber := (r1.Intn(100))
+	fmt.Println(randomnumber)
+	for i := 0; i < randomnumber; i++ {
+		//Random Director
+		seed2 := rand.NewSource(time.Now().UnixNano())
+		r2 := rand.New(seed2)
+		randomdirector := (r2.Intn(100) % 4) + 1
+		switch randomdirector {
+		case 1:
+			if canMove(b, "U") {
+				board, b = moveU(board, b)
+			}
+		case 2:
+			if canMove(b, "D") {
+				board, b = moveD(board, b)
+			}
+		case 3:
+			if canMove(b, "L") {
+				board, b = moveL(board, b)
+			}
+		case 4:
+			if canMove(b, "R") {
+				board, b = moveR(board, b)
+			}
+		}
+	}
+
+	return board, b
 }
