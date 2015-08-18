@@ -17,22 +17,28 @@ type Step struct {
 	Direction string
 }
 
+func hello(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "Hello world!")
+}
+
 func main() {
 	fmt.Println("Hello AI")
-	board := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
-	blank := []int{2, 2}
+	//board := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
+	//blank := []int{2, 2}
 
-	fmt.Println("------INIT--------")
-	fmt.Println(board)
-	fmt.Println(blank)
+	//fmt.Println("------INIT--------")
+	//fmt.Println(board)
+	//fmt.Println(blank)
 
-	fmt.Println("Start Random")
-	fmt.Println(randomPuzzle(board, blank))
-	fmt.Println("End Random")
+	//fmt.Println("Start Random")
+	//fmt.Println(randomPuzzle(board, blank))
+	//fmt.Println("End Random")
 
-	returnToFont(board)
+	//returnToFont(board)
 
-	move(board, blank, "l")
+	//move(board, blank, "l")
+	http.HandleFunc("/", hello)
+	http.ListenAndServe(":8000", nil)
 }
 
 func move(board [][]int, blank []int, direction string) [][]int {
