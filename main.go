@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"math/rand"
+	//	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -24,12 +25,21 @@ func hello(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	fmt.Println("Hello AI")
-	http.HandleFunc("/", hello)
-	http.ListenAndServe(":8000", nil)
+	//http.HandleFunc("/", hello)
+	//http.ListenAndServe(":8000", nil)
+	goal := [][]int{{1, 0, 2}, {4, 5, 3}, {7, 8, 6}}
+
+	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
+	blank := []int{2, 2}
+	print(init)
+	fmt.Println("==========START===========")
+
+	bfs(goal, init, blank)
 }
 
-func move(board [][]int, blank []int, direction string) ([][]int, []int) {
+func move(board [][]int, blank []int, direction string) ([][]int, []int, error) {
 	dir := strings.ToUpper(direction)
+	fmt.Println("Direction : ", dir)
 	if canMove(blank, dir) {
 		switch dir {
 		case "U":
@@ -41,26 +51,31 @@ func move(board [][]int, blank []int, direction string) ([][]int, []int) {
 		case "R":
 			board, blank = moveR(board, blank)
 		}
+	} else {
+		return board, blank, errors.New("Wrong move")
 	}
-	return board, blank
+	print(board)
+	fmt.Println("Blank:", blank)
+	fmt.Println("=========================")
+	return board, blank, nil
 }
 
 func canMove(blank []int, direction string) bool {
 	switch direction {
 	case "U":
-		if blank[0] == 0 {
+		if blank[0] <= 0 {
 			return false
 		}
 	case "D":
-		if blank[0] == 2 {
+		if blank[0] >= 2 {
 			return false
 		}
 	case "L":
-		if blank[1] == 0 {
+		if blank[1] <= 0 {
 			return false
 		}
 	case "R":
-		if blank[1] == 2 {
+		if blank[1] >= 2 {
 			return false
 		}
 	default:
@@ -95,67 +110,66 @@ func moveR(board [][]int, b []int) ([][]int, []int) {
 	return board, b
 }
 
-func checkIdentical(temp1 [][]int, temp2 [][]int) bool {
-	if len(temp1) != len(temp2) {
-		return false
-	}
-	for i, v := range temp1 {
-		if v != temp2[i] {
-			return false
+func checkIdentical(b1 [][]int, b2 [][]int) bool {
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 3; j++ {
+			if b1[i][j] != b2[i][j] {
+				return false
+			}
 		}
 	}
 	return true
 }
 
-func randomPuzzle(board [][]int, b []int) ([][]int, []int) {
-	//Random Number
-	seed1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(seed1)
-	randomnumber := (r1.Intn(100) + 50)
-	for i := 0; i < randomnumber; i++ {
-		//Random Director
-		seed2 := rand.NewSource(time.Now().UnixNano())
-		r2 := rand.New(seed2)
-		randomdirector := (r2.Intn(100) % 4) + 1
-		switch randomdirector {
-		case 1:
-			if canMove(b, "U") {
-				fmt.Println("move blank up")
-				board, b = moveU(board, b)
-			} else {
-				fmt.Println("Can't move")
-			}
-		case 2:
-			if canMove(b, "D") {
-				fmt.Println("move blank down")
-				board, b = moveD(board, b)
-			} else {
-				fmt.Println("Can't move")
-			}
-		case 3:
-			if canMove(b, "L") {
-				fmt.Println("move blank Left")
-				board, b = moveL(board, b)
-			} else {
-				fmt.Println("Can't move")
-			}
-		case 4:
-			if canMove(b, "R") {
-				fmt.Println("move blank Right")
-				board, b = moveR(board, b)
-			} else {
-				fmt.Println("Can't move")
-			}
-		default:
-			fmt.Println("Random move failed")
-		}
-		printPuzzle(board)
-	}
+//func randomPuzzle(board [][]int, b []int) ([][]int, []int) {
+//	//Random Number
+//	seed1 := rand.NewSource(time.Now().UnixNano())
+//	r1 := rand.New(seed1)
+//	randomnumber := (r1.Intn(100) + 50)
+//	for i := 0; i < randomnumber; i++ {
+//		//Random Director
+//		seed2 := rand.NewSource(time.Now().UnixNano())
+//		r2 := rand.New(seed2)
+//		randomdirector := (r2.Intn(100) % 4) + 1
+//		switch randomdirector {
+//		case 1:
+//			if canMove(b, "U") {
+//				fmt.Println("move blank up")
+//				board, b = moveU(board, b)
+//			} else {
+//				fmt.Println("Can't move")
+//			}
+//		case 2:
+//			if canMove(b, "D") {
+//				fmt.Println("move blank down")
+//				board, b = moveD(board, b)
+//			} else {
+//				fmt.Println("Can't move")
+//			}
+//		case 3:
+//			if canMove(b, "L") {
+//				fmt.Println("move blank Left")
+//				board, b = moveL(board, b)
+//			} else {
+//				fmt.Println("Can't move")
+//			}
+//		case 4:
+//			if canMove(b, "R") {
+//				fmt.Println("move blank Right")
+//				board, b = moveR(board, b)
+//			} else {
+//				fmt.Println("Can't move")
+//			}
+//		default:
+//			fmt.Println("Random move failed")
+//		}
+//		print(board)
+//	}
+//
+//	return board, b
+//}
 
-	return board, b
-}
-
-func printPuzzle(board [][]int) {
+func print(board [][]int) {
 	fmt.Println(board[0])
 	fmt.Println(board[1])
 	fmt.Println(board[2])
@@ -183,46 +197,44 @@ func returnToFont(board [][]int) {
 	jsonres, _ := json.Marshal(res)
 	fmt.Println(string(jsonres))
 }
-func dfs(goal, board [][]int, blank []int) bool { // return []Step
+
+// BFS Call this
+func bfs(goal, board [][]int, blank []int) bool { // return []Step
+	time.Sleep(1000 * time.Millisecond)
 	if checkIdentical(board, goal) {
 		fmt.Println("No move require")
 		return true
 	} else {
-		if dfsTv(goal, board, blank, "U") {
+		if bfsTv(goal, board, blank, "U") {
 			fmt.Println("U")
-		} else if dfsTv(goal, board, blank, "D") {
+			return true
+		} else if bfsTv(goal, board, blank, "D") {
 			fmt.Println("D")
-		} else if dfsTv(goal, board, blank, "L") {
+			return true
+		} else if bfsTv(goal, board, blank, "L") {
 			fmt.Println("L")
-		} else if dfsTv(goal, board, blank, "R") {
+			return true
+		} else if bfsTv(goal, board, blank, "R") {
 			fmt.Println("R")
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 // tv=traverse
-func dfsTv(goal, board [][]int, blank []int, direction string) bool {
-	board, blank = move(board, blank, direction)
-	//if checkIdentical(board, goal) {
-	//	fmt.Println("Success")
-	//	return true
-	//} else {
-	//	if checkIdentical(move(board, blank, "U"), goal) {
-	//		fmt.Println("U")
-	//		return true
-	//	} else if checkIdentical(move(board, blank, "D"), goal) {
-	//		fmt.Println("D")
-	//		return true
-	//	} else if checkIdentical(move(board, blank, "L"), goal) {
-	//		fmt.Println("L")
-	//		return true
-
-	//	} else if checkIdentical(move(board, blank, "R"), goal) {
-	//		fmt.Println("R")
-	//		return true
-	//	}
-	//}
-	//return checkIdentical(board, blank, goal)
-	return false // for temp
+func bfsTv(goal, board [][]int, blank []int, direction string) bool {
+	board_new, blank_new, err := move(board, blank, direction)
+	if err != nil {
+		return false
+	}
+	if checkIdentical(board_new, goal) {
+		fmt.Println("Success")
+		return true
+	} else {
+		if bfs(goal, board_new, blank_new) {
+			return true
+		}
+	}
+	return false
 }
