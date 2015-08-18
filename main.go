@@ -7,7 +7,6 @@ import (
 
 func main() {
 	fmt.Println("Hello AI")
-	//var board [3][3]int
 	board := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	blank := []int{2, 2}
 
@@ -100,4 +99,16 @@ func moveR(board [][]int, b []int) ([][]int, []int) {
 	board[b[0]][b[1]+1] = 0
 	b[1] = b[1] + 1
 	return board, b
+}
+
+func checkidentical(temp1 [3][3]int, temp2 [3][3]int) bool {
+	if len(temp1) != len(temp2) {
+		return false
+	}
+	for i, v := range temp1 {
+		if v != temp2[i] {
+			return false
+		}
+	}
+	return true
 }
