@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -18,40 +19,18 @@ type Step struct {
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "Hello world!")
+	fmt.Fprintf(w, "Hello world!")
 }
 
 func main() {
 	fmt.Println("Hello AI")
-	//board := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
-	//blank := []int{2, 2}
-
-	//fmt.Println("------INIT--------")
-	//fmt.Println(board)
-	//fmt.Println(blank)
-
-	//fmt.Println("Start Random")
-	//fmt.Println(randomPuzzle(board, blank))
-	//fmt.Println("End Random")
-
-	//returnToFont(board)
-
-	//move(board, blank, "l")
 	http.HandleFunc("/", hello)
 	http.ListenAndServe(":8000", nil)
 }
 
-func move(board [][]int, blank []int, direction string) [][]int {
+func move(board [][]int, blank []int, direction string) ([][]int, []int) {
 	dir := strings.ToUpper(direction)
-	fmt.Println("===========")
-	fmt.Println("Direction", direction)
-	fmt.Println("Blank", blank)
-	fmt.Println(board[0])
-	fmt.Println(board[1])
-	fmt.Println(board[2])
-
 	if canMove(blank, dir) {
-
 		switch dir {
 		case "U":
 			board, blank = moveU(board, blank)
@@ -61,16 +40,9 @@ func move(board [][]int, blank []int, direction string) [][]int {
 			board, blank = moveL(board, blank)
 		case "R":
 			board, blank = moveR(board, blank)
-		default:
-			panic("Undefined direction")
 		}
 	}
-	fmt.Println("----------AFTER--------")
-	fmt.Println("Blank", blank)
-	fmt.Println(board[0])
-	fmt.Println(board[1])
-	fmt.Println(board[2])
-	return board
+	return board, blank
 }
 
 func canMove(blank []int, direction string) bool {
@@ -79,25 +51,22 @@ func canMove(blank []int, direction string) bool {
 		if blank[0] == 0 {
 			return false
 		}
-		return true
 	case "D":
 		if blank[0] == 2 {
 			return false
 		}
-		return true
 	case "L":
 		if blank[1] == 0 {
 			return false
 		}
-		return true
 	case "R":
 		if blank[1] == 2 {
 			return false
 		}
-		return true
 	default:
 		return false
 	}
+	return true
 }
 
 // b is blank
@@ -126,7 +95,7 @@ func moveR(board [][]int, b []int) ([][]int, []int) {
 	return board, b
 }
 
-func checkidentical(temp1 [3][3]int, temp2 [3][3]int) bool {
+func checkIdentical(temp1 [][]int, temp2 [][]int) bool {
 	if len(temp1) != len(temp2) {
 		return false
 	}
@@ -213,4 +182,47 @@ func returnToFont(board [][]int) {
 	}
 	jsonres, _ := json.Marshal(res)
 	fmt.Println(string(jsonres))
+}
+func dfs(goal, board [][]int, blank []int) bool { // return []Step
+	if checkIdentical(board, goal) {
+		fmt.Println("No move require")
+		return true
+	} else {
+		if dfsTv(goal, board, blank, "U") {
+			fmt.Println("U")
+		} else if dfsTv(goal, board, blank, "D") {
+			fmt.Println("D")
+		} else if dfsTv(goal, board, blank, "L") {
+			fmt.Println("L")
+		} else if dfsTv(goal, board, blank, "R") {
+			fmt.Println("R")
+		}
+	}
+	return true
+}
+
+// tv=traverse
+func dfsTv(goal, board [][]int, blank []int, direction string) bool {
+	board, blank = move(board, blank, direction)
+	//if checkIdentical(board, goal) {
+	//	fmt.Println("Success")
+	//	return true
+	//} else {
+	//	if checkIdentical(move(board, blank, "U"), goal) {
+	//		fmt.Println("U")
+	//		return true
+	//	} else if checkIdentical(move(board, blank, "D"), goal) {
+	//		fmt.Println("D")
+	//		return true
+	//	} else if checkIdentical(move(board, blank, "L"), goal) {
+	//		fmt.Println("L")
+	//		return true
+
+	//	} else if checkIdentical(move(board, blank, "R"), goal) {
+	//		fmt.Println("R")
+	//		return true
+	//	}
+	//}
+	//return checkIdentical(board, blank, goal)
+	return false // for temp
 }
