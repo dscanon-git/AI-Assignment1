@@ -123,8 +123,7 @@ func randomPuzzle(board [][]int, b []int) ([][]int, []int) {
 	//Random Number
 	seed1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(seed1)
-	randomnumber := (r1.Intn(100))
-	fmt.Println(randomnumber)
+	randomnumber := (r1.Intn(100) + 50)
 	for i := 0; i < randomnumber; i++ {
 		//Random Director
 		seed2 := rand.NewSource(time.Now().UnixNano())
@@ -133,22 +132,43 @@ func randomPuzzle(board [][]int, b []int) ([][]int, []int) {
 		switch randomdirector {
 		case 1:
 			if canMove(b, "U") {
+				fmt.Println("move blank up")
 				board, b = moveU(board, b)
+			} else {
+				fmt.Println("Can't move")
 			}
 		case 2:
 			if canMove(b, "D") {
+				fmt.Println("move blank down")
 				board, b = moveD(board, b)
+			} else {
+				fmt.Println("Can't move")
 			}
 		case 3:
 			if canMove(b, "L") {
+				fmt.Println("move blank Left")
 				board, b = moveL(board, b)
+			} else {
+				fmt.Println("Can't move")
 			}
 		case 4:
 			if canMove(b, "R") {
+				fmt.Println("move blank Right")
 				board, b = moveR(board, b)
+			} else {
+				fmt.Println("Can't move")
 			}
+		default:
+			fmt.Println("Random move failed")
 		}
+		printPuzzle(board)
 	}
 
 	return board, b
+}
+
+func printPuzzle(board [][]int) {
+	fmt.Println(board[0])
+	fmt.Println(board[1])
+	fmt.Println(board[2])
 }
