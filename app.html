@@ -41,12 +41,11 @@
       <div class="tile" id="pos-7">7</div>
       <div class="tile" id="pos-8">8</div
     </div>
-    <button id="try">try</button>
 
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script type="text/javascript">
       // dummy json
-      var dummy_json = '{"init":[1, 3, 2, 0, 4, 7, 6, 5 ,8],"step":[{"tile":"2","move":"d"},{"tile":"3","move":"l"}]}';
+      var dummy_json = '{"init":[1, 3, 2, 0, 4, 7, 6, 5 ,8],"step":[{"tile":"2","move":"d"},{"tile":"3","move":"l"},{"tile":"2","move":"r"}]}';
 
       $( document ).ready(function() {
           // parse string to json
@@ -63,17 +62,47 @@
             // change id like the initial format
             $("#pos-"+i).attr("id", info["init"][i]);
           }
+
+          // Try to move on step
+          var step_arr = info["step"];
+          console.log(step_arr.length);
+          for(var j = 0;j < step_arr.length;j++){
+            console.log('tile : '+info["step"][j]["tile"]+', move: '+info["step"][j]["move"]);
+            tile_move(info["step"][j]["tile"], info["step"][j]["move"], j*1100);
+          }
       });
 
 
       // move position
-      function tile_move(id, pos){
-        if(pos == 'r' && pos == 'l'){
-          $( "#pos-"+id ).animate({
-            pos: "+=202",
-          }, 5000, function() {
-            // do it when finished animation
-          });
+      function tile_move(id, pos, time_delay){
+        switch (pos) {
+          case 'r':
+            pos = "right";
+            opt = "+"
+            break;
+          case 'l':
+            pos = "left"
+            opt = "-"
+            break;
+          case 'u':
+            pos = "top";
+            opt = "-"
+            break;
+          case 'd':
+            pos = "top";
+            opt = "+"
+            break;
+          default:
+        }
+        console.log(id+pos);
+        var move_params = {};
+        move_params[pos] = opt+"=204";
+        console.log(time_delay);
+        if(time_delay == 0){
+          console.log('here : 0');
+          $( "#"+id ).animate( move_params, 1000);
+        }else{
+          $( "#"+id ).delay(time_delay).animate( move_params, 1000);
         }
       }
 
