@@ -1,11 +1,21 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strings"
 	"time"
 )
+
+type Response struct {
+	Init     []int
+	Sequence []Step
+}
+type Step struct {
+	Tile      int
+	Direction string
+}
 
 func main() {
 	fmt.Println("Hello AI")
@@ -15,6 +25,13 @@ func main() {
 	fmt.Println("------INIT--------")
 	fmt.Println(board)
 	fmt.Println(blank)
+
+	fmt.Println("Start Random")
+	fmt.Println(randomPuzzle(board, blank))
+	fmt.Println("End Random")
+
+	returnToFont(board)
+
 	move(board, blank, "l")
 }
 
@@ -26,10 +43,6 @@ func move(board [][]int, blank []int, direction string) [][]int {
 	fmt.Println(board[0])
 	fmt.Println(board[1])
 	fmt.Println(board[2])
-
-	fmt.Println("Start Random")
-	fmt.Println(randomPuzzle(board, blank))
-	fmt.Println("End Random")
 
 	if canMove(blank, dir) {
 
@@ -171,4 +184,27 @@ func printPuzzle(board [][]int) {
 	fmt.Println(board[0])
 	fmt.Println(board[1])
 	fmt.Println(board[2])
+}
+
+func returnToFont(board [][]int) {
+	fmt.Println("Enter returnToont")
+	initpuzzle := []int{board[0][0], board[0][1], board[0][2],
+		board[1][0], board[1][1], board[1][2],
+		board[2][0], board[2][1], board[2][2]}
+
+	res := &Response{
+		Init: initpuzzle,
+		Sequence: []Step{
+			Step{
+				Tile:      5,
+				Direction: "U",
+			},
+			Step{
+				Tile:      7,
+				Direction: "U",
+			},
+		},
+	}
+	jsonres, _ := json.Marshal(res)
+	fmt.Println(string(jsonres))
 }
