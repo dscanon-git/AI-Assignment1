@@ -124,37 +124,18 @@ func checkIdentical(b1 [][]int, b2 [][]int) bool {
 }
 
 func randomPuzzle(board [][]int, b []int) ([][]int, []int) {
-	//Random Number
+	//Random seed.
 	seed1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(seed1)
 	randomnumber := (r1.Intn(100) + 50)
 
-	//keep diretor is a array of random direction sequence
-	//var keepDirector []string
-
+	//keepRune is an array of random direction sequence.
 	var directorRune = []rune("UDLR")
 	keepRune := make([]rune, randomnumber)
 	for i := range keepRune {
 		keepRune[i] = directorRune[rand.Intn(len(directorRune))]
 	}
-	//Random Director
-	//seed2 := rand.NewSource(time.Now().UnixNano())
-	//	for i := 0; i < randomnumber; i++ {
-	//		r2 := rand.New(seed2)
-	//		randomdirector := (r2.Intn(100) % 4) + 1
-	//		if randomdirector == 1 {
-	//			keepDirector = append(keepDirector, "U")
-	//		}
-	//		if randomdirector == 2 {
-	//			keepDirector = append(keepDirector, "D")
-	//		}
-	//		if randomdirector == 3 {
-	//			keepDirector = append(keepDirector, "L")
-	//		}
-	//		if randomdirector == 4 {
-	//			keepDirector = append(keepDirector, "R")
-	//		}
-	//	}
+	//Move blank follow by sequence of keepRune.
 	for _, direct := range keepRune {
 		move(board, b, string(direct))
 	}
