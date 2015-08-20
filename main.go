@@ -34,7 +34,7 @@ func main() {
 	blank := []int{2, 2}
 	print(init)
 	fmt.Println("==========START===========")
-	randomPuzzle(init, blank)
+	randomPuzzle(init, blank, 5)
 
 	//	bfs(goal, init, blank)
 }
@@ -123,17 +123,20 @@ func checkIdentical(b1 [][]int, b2 [][]int) bool {
 	return true
 }
 
-func randomPuzzle(board [][]int, b []int) ([][]int, []int) {
+//if number parameter is 0 the randomnumber will generate.
+func randomPuzzle(board [][]int, b []int, randomnumber int) ([][]int, []int) {
 	//Random seed.
 	seed1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(seed1)
-	randomnumber := (r1.Intn(100) + 50)
+	if randomnumber == 0 {
+		randomnumber = (r1.Intn(100) + 50)
+	}
 
 	//keepRune is an array of random direction sequence.
 	var directorRune = []rune("UDLR")
 	keepRune := make([]rune, randomnumber)
 	for i := range keepRune {
-		keepRune[i] = directorRune[rand.Intn(len(directorRune))]
+		keepRune[i] = directorRune[r1.Intn(len(directorRune))]
 	}
 	//Move blank follow by sequence of keepRune.
 	for _, direct := range keepRune {
