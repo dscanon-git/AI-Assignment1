@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	//	"math/rand"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -24,17 +24,19 @@ func hello(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
 	fmt.Println("Hello AI")
 	//http.HandleFunc("/", hello)
 	//http.ListenAndServe(":8000", nil)
-	goal := [][]int{{1, 0, 2}, {4, 5, 3}, {7, 8, 6}}
+	//	goal := [][]int{{1, 0, 2}, {4, 5, 3}, {7, 8, 6}}
 
 	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	blank := []int{2, 2}
 	print(init)
 	fmt.Println("==========START===========")
+	randomPuzzle(init, blank)
 
-	bfs(goal, init, blank)
+	//	bfs(goal, init, blank)
 }
 
 func move(board [][]int, blank []int, direction string) ([][]int, []int, error) {
@@ -121,53 +123,44 @@ func checkIdentical(b1 [][]int, b2 [][]int) bool {
 	return true
 }
 
-//func randomPuzzle(board [][]int, b []int) ([][]int, []int) {
-//	//Random Number
-//	seed1 := rand.NewSource(time.Now().UnixNano())
-//	r1 := rand.New(seed1)
-//	randomnumber := (r1.Intn(100) + 50)
-//	for i := 0; i < randomnumber; i++ {
-//		//Random Director
-//		seed2 := rand.NewSource(time.Now().UnixNano())
-//		r2 := rand.New(seed2)
-//		randomdirector := (r2.Intn(100) % 4) + 1
-//		switch randomdirector {
-//		case 1:
-//			if canMove(b, "U") {
-//				fmt.Println("move blank up")
-//				board, b = moveU(board, b)
-//			} else {
-//				fmt.Println("Can't move")
-//			}
-//		case 2:
-//			if canMove(b, "D") {
-//				fmt.Println("move blank down")
-//				board, b = moveD(board, b)
-//			} else {
-//				fmt.Println("Can't move")
-//			}
-//		case 3:
-//			if canMove(b, "L") {
-//				fmt.Println("move blank Left")
-//				board, b = moveL(board, b)
-//			} else {
-//				fmt.Println("Can't move")
-//			}
-//		case 4:
-//			if canMove(b, "R") {
-//				fmt.Println("move blank Right")
-//				board, b = moveR(board, b)
-//			} else {
-//				fmt.Println("Can't move")
-//			}
-//		default:
-//			fmt.Println("Random move failed")
-//		}
-//		print(board)
-//	}
-//
-//	return board, b
-//}
+func randomPuzzle(board [][]int, b []int) ([][]int, []int) {
+	//Random Number
+	seed1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(seed1)
+	randomnumber := (r1.Intn(100) + 50)
+
+	//keep diretor is a array of random direction sequence
+	//var keepDirector []string
+
+	var directorRune = []rune("UDLR")
+	keepRune := make([]rune, randomnumber)
+	for i := range keepRune {
+		keepRune[i] = directorRune[rand.Intn(len(directorRune))]
+	}
+	//Random Director
+	//seed2 := rand.NewSource(time.Now().UnixNano())
+	//	for i := 0; i < randomnumber; i++ {
+	//		r2 := rand.New(seed2)
+	//		randomdirector := (r2.Intn(100) % 4) + 1
+	//		if randomdirector == 1 {
+	//			keepDirector = append(keepDirector, "U")
+	//		}
+	//		if randomdirector == 2 {
+	//			keepDirector = append(keepDirector, "D")
+	//		}
+	//		if randomdirector == 3 {
+	//			keepDirector = append(keepDirector, "L")
+	//		}
+	//		if randomdirector == 4 {
+	//			keepDirector = append(keepDirector, "R")
+	//		}
+	//	}
+	for _, direct := range keepRune {
+		move(board, b, string(direct))
+	}
+
+	return board, b
+}
 
 func print(board [][]int) {
 	fmt.Println(board[0])
