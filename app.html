@@ -8,6 +8,8 @@
         position: relative;
         width: 612px;
         height: 612px;
+        left: 25%;
+        top: 25%;
         background-color: #bdc3c7;
       }
       .tile {
@@ -23,6 +25,8 @@
         text-align: center;
         vertical-align: middle;
         line-height: 204px;
+        background-color: #ecf0f1;
+        box-shadow: 10px 10px 5px #95a5a6;
       }
     </style>
   </head>
@@ -45,50 +49,50 @@
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script type="text/javascript">
       // dummy json
-      var dummy_json = '{"init":[1, 3, 2, 0, 4, 7, 6, 5 ,8],"step":[{"tile":"2","move":"d"},{"tile":"3","move":"l"},{"tile":"2","move":"r"}]}';
+      var dummy_json = '{"Init":[1,2,3,0,5,6,4,7,8],"Sequence":[{"Tile":4,"Direction":"U"},{"Tile":7,"Direction":"L"},{"Tile":8,"Direction":"L"}]}';
 
       $( document ).ready(function() {
           // parse string to json
           info = JSON.parse(dummy_json);
           // test
-          console.log(info["init"][0]);
-          console.log(info["step"][0]["move"]);
+          console.log(info["Init"][0]);
           // initial board game
           for(var i = 0; i < 9; i++){
-            $("#pos-"+i).html(info["init"][i]);
-            if(info["init"][i] == 0){
-              $("#pos-"+i).html("");
+            $("#pos-"+i).html(info["Init"][i]);
+            if(info["Init"][i] == 0){
+              $("#pos-"+i).remove();
             }
             // change id like the initial format
-            $("#pos-"+i).attr("id", info["init"][i]);
+            $("#pos-"+i).attr("id", info["Init"][i]);
           }
 
           // Try to move on step
-          var step_arr = info["step"];
+          var step_arr = info["Sequence"];
           console.log(step_arr.length);
           for(var j = 0;j < step_arr.length;j++){
-            console.log('tile : '+info["step"][j]["tile"]+', move: '+info["step"][j]["move"]);
-            tile_move(info["step"][j]["tile"], info["step"][j]["move"], j*1100);
+            console.log('tile : '+info["Sequence"][j]["Tile"]+', move: '+info["Sequence"][j]["Direction"]);
+            tile_move(info["Sequence"][j]["Tile"], info["Sequence"][j]["Direction"], j*1100);
           }
       });
 
 
       // move position
       function tile_move(id, pos, time_delay){
+        console.log("POS ---> "+pos);
         switch (pos) {
-          case 'r':
+          case 'R':
             pos = "right";
             opt = "+"
             break;
-          case 'l':
+          case 'L':
             pos = "left"
             opt = "-"
             break;
-          case 'u':
+          case 'U':
             pos = "top";
             opt = "-"
             break;
-          case 'd':
+          case 'D':
             pos = "top";
             opt = "+"
             break;
