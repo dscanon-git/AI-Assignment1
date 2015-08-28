@@ -200,41 +200,14 @@ func returnToFont(board [][]int) {
 
 // BFS Call this
 func bfs(goal, board [][]int, blank []int) bool { // return []Step
-	time.Sleep(1000 * time.Millisecond)
-	if checkIdentical(board, goal) {
-		fmt.Println("No move require")
-		return true
-	} else {
-		if bfsTv(goal, board, blank, "U") {
-			fmt.Println("U")
-			return true
-		} else if bfsTv(goal, board, blank, "D") {
-			fmt.Println("D")
-			return true
-		} else if bfsTv(goal, board, blank, "L") {
-			fmt.Println("L")
-			return true
-		} else if bfsTv(goal, board, blank, "R") {
-			fmt.Println("R")
-			return true
-		}
-	}
 	return false
 }
 
 // tv=traverse
 func bfsTv(goal, board [][]int, blank []int, direction string) bool {
+	// Go to other direction
 	board_new, blank_new, err := move(board, blank, direction)
 	if err != nil {
 		return false
 	}
-	if checkIdentical(board_new, goal) {
-		fmt.Println("Success")
-		return true
-	} else {
-		if bfs(goal, board_new, blank_new) {
-			return true
-		}
-	}
-	return false
 }
