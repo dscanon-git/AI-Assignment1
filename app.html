@@ -60,7 +60,8 @@
           for(var i = 0; i < 9; i++){
             $("#pos-"+i).html(info["Init"][i]);
             if(info["Init"][i] == 0){
-              $("#pos-"+i).remove();
+              	$("#pos-"+i).css("visibility", "hidden");
+              //$("#pos-"+i).remove();
             }
             // change id like the initial format
             $("#pos-"+i).attr("id", info["Init"][i]);
