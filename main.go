@@ -134,7 +134,8 @@ func main() {
 	fmt.Println("==========START===========")
 	//randomPuzzle(init, blank, 5)
 	fmt.Println("===========BFS===========")
-	bfs(goal, init, blank)
+	sol := bfs(goal, init, blank)
+	fmt.Println("Solution : ", sol.sol)
 }
 
 func move(board [][]int, blank []int, direction string) ([][]int, []int, error) {
