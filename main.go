@@ -24,6 +24,26 @@ type State struct {
 	sol   string
 }
 
+func main() {
+
+	fmt.Println("Hello AI")
+	//http.HandleFunc("/", hello)
+	//http.ListenAndServe(":8000", nil)
+	goal := [][]int{{1, 0, 2}, {4, 5, 3}, {7, 8, 6}}
+
+	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
+	blank := []int{2, 2}
+	fmt.Println("==========START===========")
+	init, blank = randomPuzzle(init, blank, 50)
+	start := copyBoard(init)
+	fmt.Println("===========BFS===========")
+	sol := bfs(goal, init, blank)
+	fmt.Println("Solution : ", sol.sol)
+	step, tile := changeBlanktoTile(init, blank, sol.sol)
+	fmt.Println(returnToFront(start, step, tile))
+	fmt.Println("******Goal******", goal)
+}
+
 func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello world!")
 }
@@ -120,22 +140,6 @@ func copyBoard(board [][]int) [][]int {
 		}
 	}
 	return newBoard
-}
-
-func main() {
-
-	fmt.Println("Hello AI")
-	//http.HandleFunc("/", hello)
-	//http.ListenAndServe(":8000", nil)
-	goal := [][]int{{1, 0, 2}, {4, 5, 3}, {7, 8, 6}}
-
-	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
-	blank := []int{2, 2}
-	fmt.Println("==========START===========")
-	//randomPuzzle(init, blank, 5)
-	fmt.Println("===========BFS===========")
-	sol := bfs(goal, init, blank)
-	fmt.Println("Solution : ", sol.sol)
 }
 
 func move(board [][]int, blank []int, direction string) ([][]int, []int, error) {
@@ -245,7 +249,7 @@ func randomPuzzle(board [][]int, b []int, randomnumber int) ([][]int, []int) {
 	fmt.Printf("RUNE %c\n", keepRune)
 	//Move blank follow by sequence of keepRune.
 	for _, direct := range keepRune {
-		move(board, b, string(direct))
+		board, b, _ = move(board, b, string(direct))
 	}
 
 	return board, b
@@ -257,25 +261,55 @@ func print(board [][]int) {
 	fmt.Println(board[2])
 }
 
-func returnToFront(board [][]int) {
+func returnToFront(board [][]int, step []string, tile []int) string {
 	fmt.Println("Enter returnToFront")
 	initpuzzle := []int{board[0][0], board[0][1], board[0][2],
 		board[1][0], board[1][1], board[1][2],
 		board[2][0], board[2][1], board[2][2]}
 
+	arrStep := []Step{}
+	for i := 0; i < len(step); i++ {
+		move := new(Step)
+		move.Tile = tile[i]
+		move.Direction = step[i]
+		arrStep = append(arrStep, *move)
+	}
+	fmt.Println(arrStep)
+
 	res := &Response{
-		Init: initpuzzle,
-		Sequence: []Step{
-			Step{
-				Tile:      5,
-				Direction: "U",
-			},
-			Step{
-				Tile:      7,
-				Direction: "U",
-			},
-		},
+		Init:     initpuzzle,
+		Sequence: arrStep,
 	}
 	jsonres, _ := json.Marshal(res)
-	fmt.Println(string(jsonres))
+	//	fmt.Println(string(jsonres))
+	return string(jsonres)
+}
+
+func changeBlanktoTile(board [][]int, b []int, direct string) ([]string, []int) {
+	//change blank move to tile move.
+	var tile []int
+	var move []string
+	for i := 0; i < len(direct); i++ {
+		switch string(direct[i]) {
+		case "U":
+			tile = append(tile, board[b[0]-1][b[1]])
+			move = append(move, "D")
+			board, b = moveU(board, b)
+		case "D":
+			tile = append(tile, board[b[0]+1][b[1]])
+			move = append(move, "U")
+			board, b = moveD(board, b)
+		case "L":
+			tile = append(tile, board[b[0]][b[1]-1])
+			move = append(move, "R")
+			board, b = moveL(board, b)
+		case "R":
+			tile = append(tile, board[b[0]][b[1]+1])
+			move = append(move, "L")
+			board, b = moveR(board, b)
+		}
+	}
+	fmt.Println(tile)
+	fmt.Println(move)
+	return move, tile
 }
