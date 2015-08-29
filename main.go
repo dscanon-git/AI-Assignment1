@@ -18,6 +18,11 @@ type Step struct {
 	Tile      int
 	Direction string
 }
+type State struct {
+	board [][]int
+	bank  []int
+	sol   string
+}
 
 func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello world!")
@@ -28,15 +33,16 @@ func main() {
 	fmt.Println("Hello AI")
 	//http.HandleFunc("/", hello)
 	//http.ListenAndServe(":8000", nil)
-	//	goal := [][]int{{1, 0, 2}, {4, 5, 3}, {7, 8, 6}}
+	goal := [][]int{{1, 0, 2}, {4, 5, 3}, {7, 8, 6}}
 
 	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	blank := []int{2, 2}
 	print(init)
 	fmt.Println("==========START===========")
 	randomPuzzle(init, blank, 5)
+	fmt.Println("===========BFS===========")
 
-	//	bfs(goal, init, blank)
+	bfs(goal, init, blank)
 }
 
 func move(board [][]int, blank []int, direction string) ([][]int, []int, error) {
@@ -138,6 +144,7 @@ func randomPuzzle(board [][]int, b []int, randomnumber int) ([][]int, []int) {
 	for i := range keepRune {
 		keepRune[i] = directorRune[r1.Intn(len(directorRune))]
 	}
+	fmt.Printf("RUNE %c\n", keepRune)
 	//Move blank follow by sequence of keepRune.
 	for _, direct := range keepRune {
 		move(board, b, string(direct))
@@ -175,16 +182,31 @@ func returnToFont(board [][]int) {
 	fmt.Println(string(jsonres))
 }
 
+
 // BFS Call this
-func bfs(goal, board [][]int, blank []int) bool { // return []Step
+func bfs(goal, board [][]int, blank []int) State { // return []Step
+	var stateQ []State = make([]State, 10)
+	i := 0
+	q := 0
+	for {
+		// Dequeue, check with goal
+		if checkIdentical(stateQ[q].board, goal) {
+			return stateQ[q]
+		}
+		// Move UDLR , Enqueue
+		
+
+	}
 	return false
 }
 
-// tv=traverse
-func bfsTv(goal, board [][]int, blank []int, direction string) bool {
-	// Go to other direction
-	board_new, blank_new, err := move(board, blank, direction)
-	if err != nil {
-		return false
-	}
+func moveWrap(board [][]int, blank []int, direction string) State {
+	return move(board, blank, direction)
+}
+
+func bfsMove(s *State, dir string) State,err {
+	board, bank, err := move(s.board, s.bank, dir)
+	s.board = board
+	s.bank = bank
+	return State{board: board, bank: bank, err: err}
 }
