@@ -86,9 +86,10 @@
               console.log('tile : '+info["Sequence"][count_step]["Tile"]+', move: '+info["Sequence"][count_step]["Direction"]);
               tile_move(obj_id, step_arr[count_step]["Direction"])
               count_step++;
-            }else{
-              $('#text-info').html(" Success !! ");
-              $('#text-info').css('color', 'green');
+              if(count_step == step_number){
+                $('#text-info').html(" Success !! ");
+                $('#text-info').css('color', 'green');
+              }
             }
           });
       });
