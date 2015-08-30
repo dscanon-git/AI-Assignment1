@@ -8,6 +8,8 @@
         position: relative;
         width: 612px;
         height: 612px;
+        left: 31%;
+        top: 25%;
         background-color: #bdc3c7;
       }
       .tile {
@@ -23,6 +25,8 @@
         text-align: center;
         vertical-align: middle;
         line-height: 204px;
+        background-color: #ecf0f1;
+        box-shadow: 10px 10px 5px #95a5a6;
       }
     </style>
   </head>
@@ -39,71 +43,78 @@
       <div class="tile" id="pos-5">5</div>
       <div class="tile" id="pos-6">6</div>
       <div class="tile" id="pos-7">7</div>
-      <div class="tile" id="pos-8">8</div
+      <div class="tile" id="pos-8">8</div>
+    </div>
+    <br /><br />
+    <div style="text-align:center;">
+      <h1>Press anykey for continue</h1>
     </div>
 
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script type="text/javascript">
       // dummy json
-      var dummy_json = '{"init":[1, 3, 2, 0, 4, 7, 6, 5 ,8],"step":[{"tile":"2","move":"d"},{"tile":"3","move":"l"},{"tile":"2","move":"r"}]}';
+      var dummy_json = '{"Init":[2,4,3,7,1,5,0,8,6],"Sequence":[{"Tile":7,"Direction":"D"},{"Tile":1,"Direction":"L"},{"Tile":4,"Direction":"D"},{"Tile":2,"Direction":"R"},{"Tile":1,"Direction":"U"},{"Tile":4,"Direction":"L"},{"Tile":5,"Direction":"L"},{"Tile":3,"Direction":"D"},{"Tile":2,"Direction":"R"}]}';
 
       $( document ).ready(function() {
           // parse string to json
           info = JSON.parse(dummy_json);
           // test
-          console.log(info["init"][0]);
-          console.log(info["step"][0]["move"]);
+          console.log(info["Init"][0]);
           // initial board game
           for(var i = 0; i < 9; i++){
-            $("#pos-"+i).html(info["init"][i]);
-            if(info["init"][i] == 0){
-              $("#pos-"+i).html("");
+            $("#pos-"+i).html(info["Init"][i]);
+            if(info["Init"][i] == 0){
+              	$("#pos-"+i).css("visibility", "hidden");
             }
             // change id like the initial format
-            $("#pos-"+i).attr("id", info["init"][i]);
+            $("#pos-"+i).attr("id", info["Init"][i]);
           }
 
           // Try to move on step
-          var step_arr = info["step"];
+          var step_arr = info["Sequence"];
           console.log(step_arr.length);
-          for(var j = 0;j < step_arr.length;j++){
-            console.log('tile : '+info["step"][j]["tile"]+', move: '+info["step"][j]["move"]);
-            tile_move(info["step"][j]["tile"], info["step"][j]["move"], j*1100);
-          }
+
+          // step moving action array
+          var action_arr = [];
+          var count_step = 0;
+
+          $ ( document ).keypress(function(e) {
+            var obj_id = step_arr[count_step]["Tile"];
+            console.log('tile : '+info["Sequence"][count_step]["Tile"]+', move: '+info["Sequence"][count_step]["Direction"]);
+            tile_move(obj_id, step_arr[count_step]["Direction"])
+            count_step++;
+          });
       });
+      
 
 
       // move position
       function tile_move(id, pos, time_delay){
+        var move_params = {};
         switch (pos) {
-          case 'r':
+          case 'R':
             pos = "right";
-            opt = "+"
+            opt = "-"
             break;
-          case 'l':
+          case 'L':
             pos = "left"
             opt = "-"
             break;
-          case 'u':
+          case 'U':
             pos = "top";
             opt = "-"
             break;
-          case 'd':
+          case 'D':
             pos = "top";
             opt = "+"
             break;
           default:
         }
         console.log(id+pos);
-        var move_params = {};
+        
         move_params[pos] = opt+"=204";
         console.log(time_delay);
-        if(time_delay == 0){
-          console.log('here : 0');
-          $( "#"+id ).animate( move_params, 1000);
-        }else{
-          $( "#"+id ).delay(time_delay).animate( move_params, 1000);
-        }
+        $( "#"+id ).animate( move_params, 1000);
       }
 
     </script>
