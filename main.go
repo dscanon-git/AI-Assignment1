@@ -34,7 +34,7 @@ func main() {
 	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	blank := []int{2, 2}
 	fmt.Println("==========START===========")
-	init, blank = randomPuzzle(init, blank, 30)
+	init, blank = randomPuzzle(init, blank, 50)
 	start := copyBoard(init)
 	fmt.Println("===========BFS===========")
 	sol := bfs(goal, init, blank)
@@ -50,6 +50,7 @@ func hello(w http.ResponseWriter, r *http.Request) {
 
 // BFS Call this
 func bfs(goal, init [][]int, blank []int) State { // return []Step
+	var stateMap map[string]bool = make(map[string]bool)
 	var stateQ []State = make([]State, 1)
 	stateQ[0].board = init
 	stateQ[0].sol = ""
@@ -68,27 +69,35 @@ func bfs(goal, init [][]int, blank []int) State { // return []Step
 		// Move UDLR , Enqueue
 		if u, err := bfsMove(&stateQ[q], "U"); err == nil {
 			i++
-			//stateQ[i] = u
-			stateQ = append(stateQ, u)
+			stateQ = bfsAppend(stateQ, stateMap, u)
 		}
 		if d, err := bfsMove(&stateQ[q], "D"); err == nil {
 			i++
-			//stateQ[i] = d
-			stateQ = append(stateQ, d)
+			stateQ = bfsAppend(stateQ, stateMap, d)
 		}
 		if l, err := bfsMove(&stateQ[q], "L"); err == nil {
 			i++
-			//stateQ[i] = l
-			stateQ = append(stateQ, l)
+			stateQ = bfsAppend(stateQ, stateMap, l)
 		}
 		if r, err := bfsMove(&stateQ[q], "R"); err == nil {
 			i++
-			//stateQ[i] = r
-			stateQ = append(stateQ, r)
+			stateQ = bfsAppend(stateQ, stateMap, r)
 		}
 	}
 	//fmt.Println(stateQ)
 	return State{} // For test only must change!!!
+}
+
+func bfsAppend(stateQ []State, hashMap map[string]bool, newState State) []State {
+	//If this state was past before then will not append its
+	key := fmt.Sprint(newState.board)
+	wasPast := hashMap[key]
+	if wasPast == true {
+		//		fmt.Println("Was past")
+		return stateQ
+	}
+	hashMap[key] = true
+	return append(stateQ, newState)
 }
 
 func bfsMove(s *State, dir string) (State, error) {
@@ -121,7 +130,6 @@ func bfsMove(s *State, dir string) (State, error) {
 		return State{}, errors.New("Can't move")
 	}
 	sol := s.sol + dir
-	// Check is this state was past before. if is was return err
 	return State{board: board, blank: blank, sol: sol}, err
 }
 
