@@ -34,7 +34,7 @@ func main() {
 	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	blank := []int{2, 2}
 	fmt.Println("==========START===========")
-	init, blank = randomPuzzle(init, blank, 50)
+	init, blank = randomPuzzle(init, blank, 30)
 	start := copyBoard(init)
 	fmt.Println("===========BFS===========")
 	sol := bfs(goal, init, blank)
@@ -54,15 +54,15 @@ func bfs(goal, init [][]int, blank []int) State { // return []Step
 	stateQ[0].board = init
 	stateQ[0].sol = ""
 	stateQ[0].blank = blank
-	fmt.Println(stateQ)
+	//fmt.Println(stateQ)
 	i := 0
 	//for {
 	for q := 0; ; q++ {
 		// Dequeue, check with goal
 		if checkIdentical(stateQ[q].board, goal) {
-			fmt.Println("---------------SUCCESS------------------")
-			fmt.Println(stateQ[q])
-			print(stateQ[q].board)
+			//fmt.Println("---------------SUCCESS------------------")
+			//fmt.Println(stateQ[q])
+			//print(stateQ[q].board)
 			return stateQ[q]
 		}
 		// Move UDLR , Enqueue
@@ -87,29 +87,29 @@ func bfs(goal, init [][]int, blank []int) State { // return []Step
 			stateQ = append(stateQ, r)
 		}
 	}
-	fmt.Println(stateQ)
+	//fmt.Println(stateQ)
 	return State{} // For test only must change!!!
 }
 
 func bfsMove(s *State, dir string) (State, error) {
-	fmt.Println("--------BFS-Gen :", dir)
-	print(s.board)
+	//fmt.Println("--------BFS-Gen :", dir)
+	//print(s.board)
 	// Check what is last move and not to counter it
 	// ie. if last what U then not D (return err)
 	if s.sol[len(s.sol):] == "U" && dir == "D" {
-		fmt.Println("No counter move")
+		//fmt.Println("No counter move")
 		return State{}, errors.New("No counter")
 	}
 	if s.sol[len(s.sol):] == "D" && dir == "U" {
-		fmt.Println("No counter move")
+		//fmt.Println("No counter move")
 		return State{}, errors.New("No counter")
 	}
 	if s.sol[len(s.sol):] == "L" && dir == "R" {
-		fmt.Println("No counter move")
+		//fmt.Println("No counter move")
 		return State{}, errors.New("No counter")
 	}
 	if s.sol[len(s.sol):] == "R" && dir == "L" {
-		fmt.Println("No counter move")
+		//fmt.Println("No counter move")
 		return State{}, errors.New("No counter")
 	}
 	// Next move
@@ -117,7 +117,7 @@ func bfsMove(s *State, dir string) (State, error) {
 	blank := copyBlank(s.blank)
 	board, blank, err := move(board, blank, dir)
 	if err != nil {
-		fmt.Println("Can't move!!!!!")
+		//fmt.Println("Can't move!!!!!")
 		return State{}, errors.New("Can't move")
 	}
 	sol := s.sol + dir
@@ -146,9 +146,9 @@ func move(board [][]int, blank []int, direction string) ([][]int, []int, error) 
 	dir := strings.ToUpper(direction)
 	newBoard := copyBoard(board)
 	newBlank := copyBlank(blank)
-	fmt.Println("Direction : ", dir)
-	print(newBoard)
-	fmt.Println("Blank :", newBlank)
+	//fmt.Println("Direction : ", dir)
+	//print(newBoard)
+	//fmt.Println("Blank :", newBlank)
 	if canMove(newBlank, dir) {
 		switch dir {
 		case "U":
@@ -163,10 +163,10 @@ func move(board [][]int, blank []int, direction string) ([][]int, []int, error) 
 	} else {
 		return newBoard, newBlank, errors.New("Can't move")
 	}
-	fmt.Println("New Board")
-	print(newBoard)
-	fmt.Println("New Blank:", newBlank)
-	fmt.Println("=========================")
+	//fmt.Println("New Board")
+	//print(newBoard)
+	//fmt.Println("New Blank:", newBlank)
+	//fmt.Println("=========================")
 	return newBoard, newBlank, nil
 }
 
@@ -262,7 +262,7 @@ func print(board [][]int) {
 }
 
 func returnToFront(board [][]int, step []string, tile []int) string {
-	fmt.Println("Enter returnToFront")
+	//fmt.Println("Enter returnToFront")
 	initpuzzle := []int{board[0][0], board[0][1], board[0][2],
 		board[1][0], board[1][1], board[1][2],
 		board[2][0], board[2][1], board[2][2]}
@@ -274,7 +274,7 @@ func returnToFront(board [][]int, step []string, tile []int) string {
 		move.Direction = step[i]
 		arrStep = append(arrStep, *move)
 	}
-	fmt.Println(arrStep)
+	///fmt.Println(arrStep)
 
 	res := &Response{
 		Init:     initpuzzle,
@@ -309,7 +309,7 @@ func changeBlanktoTile(board [][]int, b []int, direct string) ([]string, []int) 
 			board, b = moveR(board, b)
 		}
 	}
-	fmt.Println(tile)
-	fmt.Println(move)
+	//fmt.Println(tile)
+	//fmt.Println(move)
 	return move, tile
 }
