@@ -53,7 +53,8 @@
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script type="text/javascript">
       // dummy json
-      var dummy_json = '{"Init":[2,4,3,7,1,5,0,8,6],"Sequence":[{"Tile":7,"Direction":"D"},{"Tile":1,"Direction":"L"},{"Tile":4,"Direction":"D"},{"Tile":2,"Direction":"R"},{"Tile":1,"Direction":"U"},{"Tile":4,"Direction":"L"},{"Tile":5,"Direction":"L"},{"Tile":3,"Direction":"D"},{"Tile":2,"Direction":"R"}]}';
+      var dummy_json='{{.Json}}'
+      //var dummy_json = '{"Init":[2,4,3,7,1,5,0,8,6],"Sequence":[{"Tile":7,"Direction":"D"},{"Tile":1,"Direction":"L"},{"Tile":4,"Direction":"D"},{"Tile":2,"Direction":"R"},{"Tile":1,"Direction":"U"},{"Tile":4,"Direction":"L"},{"Tile":5,"Direction":"L"},{"Tile":3,"Direction":"D"},{"Tile":2,"Direction":"R"}]}';
 
       $( document ).ready(function() {
           // parse string to json

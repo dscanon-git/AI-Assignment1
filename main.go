@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -24,15 +25,11 @@ type State struct {
 	sol   string
 }
 
-func main() {
-
-	fmt.Println("Hello AI")
-	//http.HandleFunc("/", hello)
-	//http.ListenAndServe(":8000", nil)
-	goal := [][]int{{1, 0, 2}, {4, 5, 3}, {7, 8, 6}}
-
+func homeHandler(w http.ResponseWriter, r *http.Request) {
 	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
+	goal := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	blank := []int{2, 2}
+
 	fmt.Println("==========START===========")
 	init, blank = randomPuzzle(init, blank, 50)
 	start := copyBoard(init)
@@ -40,12 +37,25 @@ func main() {
 	sol := bfs(goal, init, blank)
 	fmt.Println("Solution : ", sol.sol)
 	step, tile := changeBlanktoTile(init, blank, sol.sol)
-	fmt.Println(returnToFront(start, step, tile))
+	solutionJson := returnToFront(start, step, tile)
+	fmt.Println(solutionJson)
 	fmt.Println("******Goal******", goal)
+	jsonData := struct {
+		Json string
+	}{
+		Json: solutionJson,
+	}
+
+	t, _ := template.ParseFiles("app.html")
+	t.Execute(w, jsonData)
+	//fmt.Fprintf(w, "Hello world!")
 }
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello world!")
+func main() {
+
+	fmt.Println("Hello AI")
+	http.HandleFunc("/", homeHandler)
+	http.ListenAndServe(":8000", nil)
 }
 
 // BFS Call this
