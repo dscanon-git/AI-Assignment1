@@ -8,7 +8,7 @@
         position: relative;
         width: 612px;
         height: 612px;
-        left: 25%;
+        left: 31%;
         top: 25%;
         background-color: #bdc3c7;
       }
@@ -43,13 +43,17 @@
       <div class="tile" id="pos-5">5</div>
       <div class="tile" id="pos-6">6</div>
       <div class="tile" id="pos-7">7</div>
-      <div class="tile" id="pos-8">8</div
+      <div class="tile" id="pos-8">8</div>
+    </div>
+    <br /><br />
+    <div style="text-align:center;">
+      <h1>Press anykey for continue</h1>
     </div>
 
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script type="text/javascript">
       // dummy json
-      var dummy_json = '{"Init":[1,2,3,0,5,6,4,7,8],"Sequence":[{"Tile":4,"Direction":"U"},{"Tile":7,"Direction":"L"},{"Tile":8,"Direction":"L"}]}';
+      var dummy_json = '{"Init":[2,4,3,7,1,5,0,8,6],"Sequence":[{"Tile":7,"Direction":"D"},{"Tile":1,"Direction":"L"},{"Tile":4,"Direction":"D"},{"Tile":2,"Direction":"R"},{"Tile":1,"Direction":"U"},{"Tile":4,"Direction":"L"},{"Tile":5,"Direction":"L"},{"Tile":3,"Direction":"D"},{"Tile":2,"Direction":"R"}]}';
 
       $( document ).ready(function() {
           // parse string to json
@@ -61,7 +65,6 @@
             $("#pos-"+i).html(info["Init"][i]);
             if(info["Init"][i] == 0){
               	$("#pos-"+i).css("visibility", "hidden");
-              //$("#pos-"+i).remove();
             }
             // change id like the initial format
             $("#pos-"+i).attr("id", info["Init"][i]);
@@ -70,20 +73,28 @@
           // Try to move on step
           var step_arr = info["Sequence"];
           console.log(step_arr.length);
-          for(var j = 0;j < step_arr.length;j++){
-            console.log('tile : '+info["Sequence"][j]["Tile"]+', move: '+info["Sequence"][j]["Direction"]);
-            tile_move(info["Sequence"][j]["Tile"], info["Sequence"][j]["Direction"], j*1100);
-          }
+
+          // step moving action array
+          var action_arr = [];
+          var count_step = 0;
+
+          $ ( document ).keypress(function(e) {
+            var obj_id = step_arr[count_step]["Tile"];
+            console.log('tile : '+info["Sequence"][count_step]["Tile"]+', move: '+info["Sequence"][count_step]["Direction"]);
+            tile_move(obj_id, step_arr[count_step]["Direction"])
+            count_step++;
+          });
       });
+      
 
 
       // move position
       function tile_move(id, pos, time_delay){
-        console.log("POS ---> "+pos);
+        var move_params = {};
         switch (pos) {
           case 'R':
             pos = "right";
-            opt = "+"
+            opt = "-"
             break;
           case 'L':
             pos = "left"
@@ -100,15 +111,10 @@
           default:
         }
         console.log(id+pos);
-        var move_params = {};
+        
         move_params[pos] = opt+"=204";
         console.log(time_delay);
-        if(time_delay == 0){
-          console.log('here : 0');
-          $( "#"+id ).animate( move_params, 1000);
-        }else{
-          $( "#"+id ).delay(time_delay).animate( move_params, 1000);
-        }
+        $( "#"+id ).animate( move_params, 1000);
       }
 
     </script>
