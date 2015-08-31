@@ -8,9 +8,12 @@
         position: relative;
         width: 612px;
         height: 612px;
-        left: 31%;
+        left: 27%;
         top: 25%;
-        background-color: #bdc3c7;
+        border-style: solid;
+        border-color: black;
+        border-width: 4px;
+        background-color: #428bca;
       }
       .tile {
         position: relative;
@@ -21,12 +24,12 @@
         border-style: solid;
         border-color: black;
         border-width: 2px;
-        font-size: 60px;
+        font-size: 100px;
         text-align: center;
         vertical-align: middle;
         line-height: 204px;
-        background-color: #ecf0f1;
-        box-shadow: 10px 10px 5px #95a5a6;
+        background-color: #5bc0de;
+        font-family: Arial;
       }
     </style>
   </head>
@@ -34,6 +37,10 @@
 
 
     <!-- playground -->
+    <div style="text-align:center;">
+      <h1 id = "text-info" >Press any key for continue</h1>
+    </div>
+
     <div class="frame">
       <div class="tile" id="pos-0">x</div>
       <div class="tile" id="pos-1">1</div>
@@ -45,16 +52,13 @@
       <div class="tile" id="pos-7">7</div>
       <div class="tile" id="pos-8">8</div>
     </div>
-    <br /><br />
-    <div style="text-align:center;">
-      <h1 id = "text-info" >Press anykey for continue</h1>
-    </div>
+    <br />
 
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script type="text/javascript">
       // dummy json
       var dummy_json='{{.Json}}'
-      //var dummy_json = '{"Init":[0,4,6,3,2,1,5,7,8],"Sequence":[{"Tile":4,"Direction":"L"},{"Tile":2,"Direction":"U"},{"Tile":1,"Direction":"L"},{"Tile":6,"Direction":"D"},{"Tile":2,"Direction":"R"},{"Tile":1,"Direction":"U"},{"Tile":3,"Direction":"R"},{"Tile":5,"Direction":"U"},{"Tile":7,"Direction":"L"},{"Tile":8,"Direction":"L"},{"Tile":6,"Direction":"D"},{"Tile":3,"Direction":"R"},{"Tile":5,"Direction":"R"},{"Tile":4,"Direction":"D"},{"Tile":1,"Direction":"L"},{"Tile":2,"Direction":"L"},{"Tile":3,"Direction":"U"},{"Tile":6,"Direction":"U"}]}';
+      /*var dummy_json = '{"Init":[0,4,6,3,2,1,5,7,8],"Sequence":[{"Tile":4,"Direction":"L"},{"Tile":2,"Direction":"U"},{"Tile":1,"Direction":"L"},{"Tile":6,"Direction":"D"},{"Tile":2,"Direction":"R"},{"Tile":1,"Direction":"U"},{"Tile":3,"Direction":"R"},{"Tile":5,"Direction":"U"},{"Tile":7,"Direction":"L"},{"Tile":8,"Direction":"L"},{"Tile":6,"Direction":"D"},{"Tile":3,"Direction":"R"},{"Tile":5,"Direction":"R"},{"Tile":4,"Direction":"D"},{"Tile":1,"Direction":"L"},{"Tile":2,"Direction":"L"},{"Tile":3,"Direction":"U"},{"Tile":6,"Direction":"U"}]}';*/
 
       $( document ).ready(function() {
           // parse string to json
@@ -87,7 +91,7 @@
               tile_move(obj_id, step_arr[count_step]["Direction"])
               count_step++;
               if(count_step == step_number){
-                $('#text-info').html(" Successs !! ");
+                $('#text-info').html(" Success !! ");
                 $('#text-info').css('color', 'green');
               }
             }
