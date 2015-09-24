@@ -24,18 +24,19 @@ type State struct {
 	blank    []int
 	sol      string
 	priority int
-	index    int
 }
 
 type PQ []State
 
-func (pq PQ) Less(i, j int) bool {
-	return pq[i].priority > pq[j].priority
+func push(pq *PQ, st *State) {
+	*pq = append(*pq, *st)
 }
 
-func Push(pq *PQ, st *State) {
-	fmt.Println("Test", *st)
-	*pq = append(*pq, *st)
+func pull_high_pri(pq *PQ) State {
+	for i, e := range *pq {
+		fmt.Println("i : ", i, e)
+	}
+	return (*pq)[0]
 }
 
 func main() {
@@ -43,11 +44,15 @@ func main() {
 	state := new(State)
 	state.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	state.priority = 2
-	//pq := make([]PQ, 2)
+
+	state2 := new(State)
+	state2.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+	state2.priority = 1
 	pq := new(PQ)
-	Push(pq, state)
-	Push(pq, state)
-	fmt.Println(*pq)
+	push(pq, state)
+	push(pq, state2)
+	fmt.Println((*pq)[0])
+	pull_high_pri(pq)
 	//	fmt.Println("Hello AI")
 	//	http.HandleFunc("/", homeHandler)
 	//	http.ListenAndServe(":8000", nil)
