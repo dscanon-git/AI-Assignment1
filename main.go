@@ -20,9 +20,37 @@ type Step struct {
 	Direction string
 }
 type State struct {
-	board [][]int
-	blank []int
-	sol   string
+	board    [][]int
+	blank    []int
+	sol      string
+	priority int
+	index    int
+}
+
+type PQ []State
+
+func (pq PQ) Less(i, j int) bool {
+	return pq[i].priority > pq[j].priority
+}
+
+func Push(pq *PQ, st *State) {
+	fmt.Println("Test", *st)
+	*pq = append(*pq, *st)
+}
+
+func main() {
+
+	state := new(State)
+	state.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+	state.priority = 2
+	//pq := make([]PQ, 2)
+	pq := new(PQ)
+	Push(pq, state)
+	Push(pq, state)
+	fmt.Println(*pq)
+	//	fmt.Println("Hello AI")
+	//	http.HandleFunc("/", homeHandler)
+	//	http.ListenAndServe(":8000", nil)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -49,13 +77,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("app.html")
 	t.Execute(w, jsonData)
 	//fmt.Fprintf(w, "Hello world!")
-}
-
-func main() {
-
-	fmt.Println("Hello AI")
-	http.HandleFunc("/", homeHandler)
-	http.ListenAndServe(":8000", nil)
 }
 
 // BFS Call this
