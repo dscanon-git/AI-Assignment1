@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/heap"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,19 +25,43 @@ type State struct {
 	blank    []int
 	sol      string
 	priority int
+	index    int
 }
 
-type PQ []State
+type PQ []*State
 
-func push(pq *PQ, st *State) {
-	*pq = append(*pq, *st)
+func (pq PQ) Len() int { return len(pq) }
+
+func (pq PQ) Less(i, j int) bool {
+	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
+	return pq[i].priority > pq[j].priority
+}
+func (pq PQ) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+	pq[i].index = i
+	pq[j].index = j
 }
 
-func pull_high_pri(pq *PQ) State {
-	for i, e := range *pq {
-		fmt.Println("i : ", i, e)
-	}
-	return (*pq)[0]
+func (pq *PQ) Push(x interface{}) {
+	n := len(*pq)
+	item := x.(*State)
+	item.index = n
+	*pq = append(*pq, item)
+}
+
+func (pq *PQ) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	item.index = -1 // for safety
+	*pq = old[0 : n-1]
+	return item
+}
+
+func (pq *PQ) update(item *State, board [][]int, priority int) {
+	item.board = board
+	item.priority = priority
+	heap.Fix(pq, item.index)
 }
 
 func main() {
@@ -48,11 +73,13 @@ func main() {
 	state2 := new(State)
 	state2.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	state2.priority = 1
-	pq := new(PQ)
-	push(pq, state)
-	push(pq, state2)
-	fmt.Println((*pq)[0])
-	pull_high_pri(pq)
+	pq := make(PQ, 0)
+	heap.Init(&pq)
+	heap.Push(&pq, state)
+	heap.Push(&pq, state2)
+
+	fmt.Println(pq)
+
 	//	fmt.Println("Hello AI")
 	//	http.HandleFunc("/", homeHandler)
 	//	http.ListenAndServe(":8000", nil)
