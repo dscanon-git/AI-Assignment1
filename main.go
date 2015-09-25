@@ -65,33 +65,33 @@ func (pq *PQ) update(item *State, board [][]int, blank []int, sol string, priori
 }
 
 func main() {
-	state := new(State)
-	state.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
-	state.blank = []int{1, 2}
-	state.sol = "B"
-	state.priority = 3
-	state2 := new(State)
-	state2.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
-	state2.blank = []int{1, 2}
-	state2.sol = "A"
-	state2.priority = 4
-	state3 := new(State)
-	state3.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
-	state3.blank = []int{1, 2}
-	state3.sol = "C"
-	state3.priority = 2
-	pq := make(PQ, 0)
-	heap.Init(&pq)
-	heap.Push(&pq, state)
-	heap.Push(&pq, state2)
-	heap.Push(&pq, state3)
-	for i := 0; i < len(pq); i++ {
-		fmt.Println("IN-Q", (pq)[i])
-	}
+	//	state := new(State)
+	//	state.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+	//	state.blank = []int{1, 2}
+	//	state.sol = "B"
+	//	state.priority = 3
+	//	state2 := new(State)
+	//	state2.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+	//	state2.blank = []int{1, 2}
+	//	state2.sol = "A"
+	//	state2.priority = 4
+	//	state3 := new(State)
+	//	state3.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+	//	state3.blank = []int{1, 2}
+	//	state3.sol = "C"
+	//	state3.priority = 2
+	//	pq := make(PQ, 0)
+	//	heap.Init(&pq)
+	//	heap.Push(&pq, state)
+	//	heap.Push(&pq, state2)
+	//	heap.Push(&pq, state3)
+	//	for i := 0; i < len(pq); i++ {
+	//		fmt.Println("IN-Q", (pq)[i])
+	//	}
 
-	//	fmt.Println("Hello AI")
-	//	http.HandleFunc("/", homeHandler)
-	//	http.ListenAndServe(":8000", nil)
+	fmt.Println("Hello AI")
+	http.HandleFunc("/", homeHandler)
+	http.ListenAndServe(":8000", nil)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +125,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 func bfs(goal, init [][]int, blank []int) State { // return []Step
 	var stateMap map[string]bool = make(map[string]bool)
 	//	var stateQ []State = make([]State, 1)
-	stateQ := make(PQ, 1)
+	stateQ := make(PQ, 0)
 	heap.Init(&stateQ)
 	state := new(State)
 	state.board = init
