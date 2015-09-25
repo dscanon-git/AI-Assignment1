@@ -3,10 +3,10 @@ package main
 import (
 	"container/heap"
 	"encoding/json"
-	"log"
 	"errors"
 	"fmt"
 	"html/template"
+	"log"
 	"math"
 	"math/rand"
 	"net/http"
@@ -99,21 +99,21 @@ func evalFn(goal, now [][]int, actualCost int) int {
 	// Todo : Need to reconstruc new way of HashMap use
 
 	// f(x) = g(x)+h(x) = realCost + heuristicCost
-	heuristicCost:=heuristicFn(goal,now)
-	hFactor:=1 // Todo : Need to adjust this value to speed up and optimize result path (result is not optimal)
-	return actualCost+1+hFactor*heuristicCost
+	heuristicCost := heuristicFn(goal, now)
+	hFactor := 1 // Todo : Need to adjust this value to speed up and optimize result path (result is not optimal)
+	return actualCost + 1 + hFactor*heuristicCost
 }
 
 func heuristicFn(goal, now [][]int) int {
-	return h1(goal,now)+h2(goal,now)
+	return h1(goal, now) + h2(goal, now)
 }
 
 // Count number of tile that in incorrect position
 func h1(goal, now [][]int) int {
-	incorrectNo:=0
+	incorrectNo := 0
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			if now[i][j]!=goal[i][j]{
+			if now[i][j] != goal[i][j] {
 				incorrectNo++
 			}
 		}
@@ -123,12 +123,12 @@ func h1(goal, now [][]int) int {
 
 // Sum distance of each tile how far from correct position (Manhattan)
 func h2(goal, now [][]int) int {
-	sumDistance:=0
+	sumDistance := 0
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			if distance,err:=manhattanDistance(goal[i][j],i,j,now); err==nil{
-				sumDistance+=distance
-			}else{
+			if distance, err := manhattanDistance(goal[i][j], i, j, now); err == nil {
+				sumDistance += distance
+			} else {
 				log.Println("Something Wrong!!!")
 			}
 		}
@@ -138,18 +138,18 @@ func h2(goal, now [][]int) int {
 
 // Manhattan distance
 // PS. Actually vert is j, horz is i
-func manhattanDistance(targetTile,vertPosition,HorzPosition int,board [][]int) (int,error){
+func manhattanDistance(targetTile, vertPosition, HorzPosition int, board [][]int) (int, error) {
 	// vertDiff+horzDiff
 	for i := 0; i < 3; i++ {
-		for j := 0; j <3; j++ {
-			if board[i][j]==targetTile{
-				vertDiff:=math.Abs(float64(vertPosition-i))
-				horzDiff:=math.Abs(float64(HorzPosition-j))
-				return int(vertDiff+horzDiff),nil
+		for j := 0; j < 3; j++ {
+			if board[i][j] == targetTile {
+				vertDiff := math.Abs(float64(vertPosition - i))
+				horzDiff := math.Abs(float64(HorzPosition - j))
+				return int(vertDiff + horzDiff), nil
 			}
 		}
 	}
-	return -1,errors.New("Can't find target tile")
+	return -1, errors.New("Can't find target tile")
 }
 
 func main() {
@@ -158,8 +158,8 @@ func main() {
 	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	goal := [][]int{{0, 2, 3}, {4, 5, 6}, {7, 8, 1}}
 
-	fmt.Println("h1 ",h1(goal,init))
-	fmt.Println("h2 ",h2(goal,init))
+	fmt.Println("h1 ", h1(goal, init))
+	fmt.Println("h2 ", h2(goal, init))
 
 	fmt.Println("Running http://localhost:8000/")
 	http.HandleFunc("/", homeHandler)
@@ -226,7 +226,9 @@ func bfsAppend(stateQ PQ, hashMap map[string]bool, newState State) PQ {
 		return stateQ
 	}
 	hashMap[key] = true
-	return append(stateQ, &newState)
+	//return append(stateQ, &newState)
+	heap.Push(&stateQ, &newState)
+	return stateQ
 }
 
 func bfsMove(s *State, dir string) (State, error) {
