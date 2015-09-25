@@ -68,12 +68,12 @@ func (pq *PQ) update(item *State, board [][]int, blank []int, sol string, priori
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Home Handler")
-	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
+	init := [][]int{{1, 2, 3}, {4, 0, 5}, {7, 8, 6}}
 	goal := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
-	blank := []int{2, 2}
+	blank := []int{1, 1}
 
 	fmt.Println("==========START===========")
-	init, blank = randomPuzzle(init, blank, 50)
+	init, blank = randomPuzzle(init, blank, 10)
 	start := copyBoard(init)
 	fmt.Println("===========BFS===========")
 	sol := bfs(goal, init, blank)
@@ -185,33 +185,33 @@ func bfs(goal, init [][]int, blank []int) State { // return []Step
 	//	stateQ[0].sol = ""
 	//	stateQ[0].blank = blank
 	//fmt.Println(stateQ)
-	i := 0
 	//for {
-	for q := 0; ; q++ {
+	for {
+		//		fmt.Println("All heap: ", stateQ)
 		// Dequeue, check with goal
-		if checkIdentical(stateQ[q].board, goal) {
+		temp := heap.Pop(&stateQ).(*State)
+		fmt.Println(temp)
+		fmt.Println(temp.board)
+		if checkIdentical(temp.board, goal) {
 			//fmt.Println("---------------SUCCESS------------------")
 			//fmt.Println(stateQ[q])
 			//print(stateQ[q].board)
-			return *stateQ[q]
+			return *temp
 		}
 		// Move UDLR , Enqueue
-		if u, err := bfsMove(stateQ[q], "U"); err == nil {
-			i++
+		if u, err := bfsMove(temp, "U"); err == nil {
 			stateQ = bfsAppend(stateQ, stateMap, u)
 		}
-		if d, err := bfsMove(stateQ[q], "D"); err == nil {
-			i++
+		if d, err := bfsMove(temp, "D"); err == nil {
 			stateQ = bfsAppend(stateQ, stateMap, d)
 		}
-		if l, err := bfsMove(stateQ[q], "L"); err == nil {
-			i++
+		if l, err := bfsMove(temp, "L"); err == nil {
 			stateQ = bfsAppend(stateQ, stateMap, l)
 		}
-		if r, err := bfsMove(stateQ[q], "R"); err == nil {
-			i++
+		if r, err := bfsMove(temp, "R"); err == nil {
 			stateQ = bfsAppend(stateQ, stateMap, r)
 		}
+		time.Sleep(10 * time.Millisecond)
 	}
 	//fmt.Println(stateQ)
 	return State{} // For test only must change!!!
@@ -237,19 +237,19 @@ func bfsMove(s *State, dir string) (State, error) {
 	// Check what is last move and not to counter it
 	// ie. if last what U then not D (return err)
 	if s.sol[len(s.sol):] == "U" && dir == "D" {
-		//fmt.Println("No counter move")
+		fmt.Println("No counter move")
 		return State{}, errors.New("No counter")
 	}
 	if s.sol[len(s.sol):] == "D" && dir == "U" {
-		//fmt.Println("No counter move")
+		fmt.Println("No counter move")
 		return State{}, errors.New("No counter")
 	}
 	if s.sol[len(s.sol):] == "L" && dir == "R" {
-		//fmt.Println("No counter move")
+		fmt.Println("No counter move")
 		return State{}, errors.New("No counter")
 	}
 	if s.sol[len(s.sol):] == "R" && dir == "L" {
-		//fmt.Println("No counter move")
+		fmt.Println("No counter move")
 		return State{}, errors.New("No counter")
 	}
 	// Next move
@@ -261,7 +261,7 @@ func bfsMove(s *State, dir string) (State, error) {
 		return State{}, errors.New("Can't move")
 	}
 	sol := s.sol + dir
-	return State{board: board, blank: blank, sol: sol}, err
+	return State{board: board, blank: blank, sol: sol, priority: s.priority + 1}, err
 }
 
 func copyBlank(blank []int) []int {
@@ -300,6 +300,7 @@ func move(board [][]int, blank []int, direction string) ([][]int, []int, error) 
 			moveR(newBoard, newBlank)
 		}
 	} else {
+		fmt.Println("can't move.")
 		return newBoard, newBlank, errors.New("Can't move")
 	}
 	//fmt.Println("New Board")
