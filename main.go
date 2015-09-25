@@ -34,7 +34,7 @@ func (pq PQ) Len() int { return len(pq) }
 
 func (pq PQ) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return pq[i].priority > pq[j].priority
+	return pq[i].priority < pq[j].priority
 }
 func (pq PQ) Swap(i, j int) {
 	pq[i], pq[j] = pq[j], pq[i]
@@ -58,27 +58,36 @@ func (pq *PQ) Pop() interface{} {
 	return item
 }
 
-func (pq *PQ) update(item *State, board [][]int, priority int) {
+func (pq *PQ) update(item *State, board [][]int, blank []int, sol string, priority int) {
 	item.board = board
 	item.priority = priority
 	heap.Fix(pq, item.index)
 }
 
 func main() {
-
 	state := new(State)
 	state.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
-	state.priority = 2
-
+	state.blank = []int{1, 2}
+	state.sol = "B"
+	state.priority = 3
 	state2 := new(State)
 	state2.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
-	state2.priority = 1
+	state2.blank = []int{1, 2}
+	state2.sol = "A"
+	state2.priority = 4
+	state3 := new(State)
+	state3.board = [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+	state3.blank = []int{1, 2}
+	state3.sol = "C"
+	state3.priority = 2
 	pq := make(PQ, 0)
 	heap.Init(&pq)
 	heap.Push(&pq, state)
 	heap.Push(&pq, state2)
-
-	fmt.Println(pq)
+	heap.Push(&pq, state3)
+	for i := 0; i < len(pq); i++ {
+		fmt.Println("IN-Q", (pq)[i])
+	}
 
 	//	fmt.Println("Hello AI")
 	//	http.HandleFunc("/", homeHandler)
@@ -86,6 +95,7 @@ func main() {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Home Handler")
 	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	goal := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	blank := []int{2, 2}
@@ -114,10 +124,21 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 // BFS Call this
 func bfs(goal, init [][]int, blank []int) State { // return []Step
 	var stateMap map[string]bool = make(map[string]bool)
-	var stateQ []State = make([]State, 1)
-	stateQ[0].board = init
-	stateQ[0].sol = ""
-	stateQ[0].blank = blank
+	//	var stateQ []State = make([]State, 1)
+	stateQ := make(PQ, 1)
+	heap.Init(&stateQ)
+	state := new(State)
+	state.board = init
+	state.sol = ""
+	state.blank = blank
+	state.priority = 1
+	fmt.Println("StateQ : ", &stateQ)
+	fmt.Println("state :", state)
+	heap.Push(&stateQ, state)
+	fmt.Println("HEAP HEAP")
+	//	stateQ[0].board = init
+	//	stateQ[0].sol = ""
+	//	stateQ[0].blank = blank
 	//fmt.Println(stateQ)
 	i := 0
 	//for {
@@ -127,22 +148,22 @@ func bfs(goal, init [][]int, blank []int) State { // return []Step
 			//fmt.Println("---------------SUCCESS------------------")
 			//fmt.Println(stateQ[q])
 			//print(stateQ[q].board)
-			return stateQ[q]
+			return *stateQ[q]
 		}
 		// Move UDLR , Enqueue
-		if u, err := bfsMove(&stateQ[q], "U"); err == nil {
+		if u, err := bfsMove(stateQ[q], "U"); err == nil {
 			i++
 			stateQ = bfsAppend(stateQ, stateMap, u)
 		}
-		if d, err := bfsMove(&stateQ[q], "D"); err == nil {
+		if d, err := bfsMove(stateQ[q], "D"); err == nil {
 			i++
 			stateQ = bfsAppend(stateQ, stateMap, d)
 		}
-		if l, err := bfsMove(&stateQ[q], "L"); err == nil {
+		if l, err := bfsMove(stateQ[q], "L"); err == nil {
 			i++
 			stateQ = bfsAppend(stateQ, stateMap, l)
 		}
-		if r, err := bfsMove(&stateQ[q], "R"); err == nil {
+		if r, err := bfsMove(stateQ[q], "R"); err == nil {
 			i++
 			stateQ = bfsAppend(stateQ, stateMap, r)
 		}
@@ -151,7 +172,7 @@ func bfs(goal, init [][]int, blank []int) State { // return []Step
 	return State{} // For test only must change!!!
 }
 
-func bfsAppend(stateQ []State, hashMap map[string]bool, newState State) []State {
+func bfsAppend(stateQ PQ, hashMap map[string]bool, newState State) PQ {
 	//If this state was past before then will not append its
 	key := fmt.Sprint(newState.board)
 	wasPast := hashMap[key]
@@ -160,7 +181,7 @@ func bfsAppend(stateQ []State, hashMap map[string]bool, newState State) []State 
 		return stateQ
 	}
 	hashMap[key] = true
-	return append(stateQ, newState)
+	return append(stateQ, &newState)
 }
 
 func bfsMove(s *State, dir string) (State, error) {
