@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/heap"
 	"encoding/json"
 	"log"
 	"errors"
@@ -22,12 +23,51 @@ type Step struct {
 	Direction string
 }
 type State struct {
-	board [][]int
-	blank []int
-	sol   string
+	board    [][]int
+	blank    []int
+	sol      string
+	priority int
+	index    int
+}
+
+type PQ []*State
+
+func (pq PQ) Len() int { return len(pq) }
+
+func (pq PQ) Less(i, j int) bool {
+	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
+	return pq[i].priority < pq[j].priority
+}
+func (pq PQ) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+	pq[i].index = i
+	pq[j].index = j
+}
+
+func (pq *PQ) Push(x interface{}) {
+	n := len(*pq)
+	item := x.(*State)
+	item.index = n
+	*pq = append(*pq, item)
+}
+
+func (pq *PQ) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	item.index = -1 // for safety
+	*pq = old[0 : n-1]
+	return item
+}
+
+func (pq *PQ) update(item *State, board [][]int, blank []int, sol string, priority int) {
+	item.board = board
+	item.priority = priority
+	heap.Fix(pq, item.index)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Home Handler")
 	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	goal := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	blank := []int{2, 2}
@@ -129,10 +169,21 @@ func main() {
 // BFS Call this
 func bfs(goal, init [][]int, blank []int) State { // return []Step
 	var stateMap map[string]bool = make(map[string]bool)
-	var stateQ []State = make([]State, 1)
-	stateQ[0].board = init
-	stateQ[0].sol = ""
-	stateQ[0].blank = blank
+	//	var stateQ []State = make([]State, 1)
+	stateQ := make(PQ, 0)
+	heap.Init(&stateQ)
+	state := new(State)
+	state.board = init
+	state.sol = ""
+	state.blank = blank
+	state.priority = 0
+	fmt.Println("StateQ : ", &stateQ)
+	fmt.Println("state :", state)
+	heap.Push(&stateQ, state)
+	fmt.Println("HEAP HEAP")
+	//	stateQ[0].board = init
+	//	stateQ[0].sol = ""
+	//	stateQ[0].blank = blank
 	//fmt.Println(stateQ)
 	i := 0
 	//for {
@@ -142,22 +193,22 @@ func bfs(goal, init [][]int, blank []int) State { // return []Step
 			//fmt.Println("---------------SUCCESS------------------")
 			//fmt.Println(stateQ[q])
 			//print(stateQ[q].board)
-			return stateQ[q]
+			return *stateQ[q]
 		}
 		// Move UDLR , Enqueue
-		if u, err := bfsMove(&stateQ[q], "U"); err == nil {
+		if u, err := bfsMove(stateQ[q], "U"); err == nil {
 			i++
 			stateQ = bfsAppend(stateQ, stateMap, u)
 		}
-		if d, err := bfsMove(&stateQ[q], "D"); err == nil {
+		if d, err := bfsMove(stateQ[q], "D"); err == nil {
 			i++
 			stateQ = bfsAppend(stateQ, stateMap, d)
 		}
-		if l, err := bfsMove(&stateQ[q], "L"); err == nil {
+		if l, err := bfsMove(stateQ[q], "L"); err == nil {
 			i++
 			stateQ = bfsAppend(stateQ, stateMap, l)
 		}
-		if r, err := bfsMove(&stateQ[q], "R"); err == nil {
+		if r, err := bfsMove(stateQ[q], "R"); err == nil {
 			i++
 			stateQ = bfsAppend(stateQ, stateMap, r)
 		}
@@ -166,7 +217,7 @@ func bfs(goal, init [][]int, blank []int) State { // return []Step
 	return State{} // For test only must change!!!
 }
 
-func bfsAppend(stateQ []State, hashMap map[string]bool, newState State) []State {
+func bfsAppend(stateQ PQ, hashMap map[string]bool, newState State) PQ {
 	//If this state was past before then will not append its
 	key := fmt.Sprint(newState.board)
 	wasPast := hashMap[key]
@@ -175,7 +226,7 @@ func bfsAppend(stateQ []State, hashMap map[string]bool, newState State) []State 
 		return stateQ
 	}
 	hashMap[key] = true
-	return append(stateQ, newState)
+	return append(stateQ, &newState)
 }
 
 func bfsMove(s *State, dir string) (State, error) {
