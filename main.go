@@ -76,7 +76,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	init, blank = randomPuzzle(init, blank, 50)
 	start := copyBoard(init)
 	// fmt.Println("===========BFS===========")
-	sol := bfs(goal, init, blank)
+	sol := aStar(goal, init, blank)
 	fmt.Println("Solution : ", sol.sol)
 	step, tile := changeBlanktoTile(init, blank, sol.sol)
 	solutionJson := returnToFront(start, step, tile)
@@ -167,7 +167,7 @@ func main() {
 }
 
 // BFS Call this
-func bfs(goal, init [][]int, blank []int) State { // return []Step
+func aStar(goal, init [][]int, blank []int) State { // return []Step
 	var stateMap map[string]int = make(map[string]int)
 	//	var stateQ []State = make([]State, 1)
 	stateQ := make(PQ, 0)
@@ -199,28 +199,28 @@ func bfs(goal, init [][]int, blank []int) State { // return []Step
 			return *temp
 		}
 		// Move UDLR , Enqueue
-		if u, err := bfsMove(temp, "U"); err == nil {
+		if u, err := aStarMove(temp, "U"); err == nil {
 			u.priority = evalFn(goal, u.board, len(u.sol))
-			stateQ = bfsAppend(stateQ, stateMap, u)
+			stateQ = aStarAppend(stateQ, stateMap, u)
 		}
-		if d, err := bfsMove(temp, "D"); err == nil {
+		if d, err := aStarMove(temp, "D"); err == nil {
 			d.priority = evalFn(goal, d.board, len(d.sol))
-			stateQ = bfsAppend(stateQ, stateMap, d)
+			stateQ = aStarAppend(stateQ, stateMap, d)
 		}
-		if l, err := bfsMove(temp, "L"); err == nil {
+		if l, err := aStarMove(temp, "L"); err == nil {
 			l.priority = evalFn(goal, l.board, len(l.sol))
-			stateQ = bfsAppend(stateQ, stateMap, l)
+			stateQ = aStarAppend(stateQ, stateMap, l)
 		}
-		if r, err := bfsMove(temp, "R"); err == nil {
+		if r, err := aStarMove(temp, "R"); err == nil {
 			r.priority = evalFn(goal, r.board, len(r.sol))
-			stateQ = bfsAppend(stateQ, stateMap, r)
+			stateQ = aStarAppend(stateQ, stateMap, r)
 		}
 	}
 	//fmt.Println(stateQ)
 	return State{} // For test only must change!!!
 }
 
-func bfsAppend(stateQ PQ, hashMap map[string]int, newState State) PQ {
+func aStarAppend(stateQ PQ, hashMap map[string]int, newState State) PQ {
 	//If this state was past before then will not append its
 	key := fmt.Sprint(newState.board)
 	passedLv := hashMap[key]
@@ -235,7 +235,7 @@ func bfsAppend(stateQ PQ, hashMap map[string]int, newState State) PQ {
 	return stateQ
 }
 
-func bfsMove(s *State, dir string) (State, error) {
+func aStarMove(s *State, dir string) (State, error) {
 	//fmt.Println("--------BFS-Gen :", dir)
 	//print(s.board)
 	// Check what is last move and not to counter it
