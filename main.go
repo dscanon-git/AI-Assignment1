@@ -73,9 +73,9 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	blank := []int{1, 1}
 
 	fmt.Println("==========START===========")
-	init, blank = randomPuzzle(init, blank, 10)
+	init, blank = randomPuzzle(init, blank, 50)
 	start := copyBoard(init)
-	fmt.Println("===========BFS===========")
+	// fmt.Println("===========BFS===========")
 	sol := bfs(goal, init, blank)
 	fmt.Println("Solution : ", sol.sol)
 	step, tile := changeBlanktoTile(init, blank, sol.sol)
@@ -168,7 +168,7 @@ func main() {
 
 // BFS Call this
 func bfs(goal, init [][]int, blank []int) State { // return []Step
-	var stateMap map[string]bool = make(map[string]bool)
+	var stateMap map[string]int = make(map[string]int)
 	//	var stateQ []State = make([]State, 1)
 	stateQ := make(PQ, 0)
 	heap.Init(&stateQ)
@@ -200,32 +200,36 @@ func bfs(goal, init [][]int, blank []int) State { // return []Step
 		}
 		// Move UDLR , Enqueue
 		if u, err := bfsMove(temp, "U"); err == nil {
+			u.priority = evalFn(goal, u.board, len(u.sol))
 			stateQ = bfsAppend(stateQ, stateMap, u)
 		}
 		if d, err := bfsMove(temp, "D"); err == nil {
+			d.priority = evalFn(goal, d.board, len(d.sol))
 			stateQ = bfsAppend(stateQ, stateMap, d)
 		}
 		if l, err := bfsMove(temp, "L"); err == nil {
+			l.priority = evalFn(goal, l.board, len(l.sol))
 			stateQ = bfsAppend(stateQ, stateMap, l)
 		}
 		if r, err := bfsMove(temp, "R"); err == nil {
+			r.priority = evalFn(goal, r.board, len(r.sol))
 			stateQ = bfsAppend(stateQ, stateMap, r)
 		}
-		time.Sleep(10 * time.Millisecond)
 	}
 	//fmt.Println(stateQ)
 	return State{} // For test only must change!!!
 }
 
-func bfsAppend(stateQ PQ, hashMap map[string]bool, newState State) PQ {
+func bfsAppend(stateQ PQ, hashMap map[string]int, newState State) PQ {
 	//If this state was past before then will not append its
 	key := fmt.Sprint(newState.board)
-	wasPast := hashMap[key]
-	if wasPast == true {
-		//		fmt.Println("Was past")
+	passedLv := hashMap[key]
+	if len(newState.sol) > passedLv && passedLv != 0 {
+		fmt.Println("was passed on shorter path.")
 		return stateQ
 	}
-	hashMap[key] = true
+	fmt.Println("current :  ", len(newState.sol), "past", passedLv)
+	hashMap[key] = len(newState.sol)
 	//return append(stateQ, &newState)
 	heap.Push(&stateQ, &newState)
 	return stateQ
@@ -261,7 +265,7 @@ func bfsMove(s *State, dir string) (State, error) {
 		return State{}, errors.New("Can't move")
 	}
 	sol := s.sol + dir
-	return State{board: board, blank: blank, sol: sol, priority: s.priority + 1}, err
+	return State{board: board, blank: blank, sol: sol}, err
 }
 
 func copyBlank(blank []int) []int {
