@@ -67,6 +67,7 @@ func (pq *PQ) update(item *State, board [][]int, blank []int, sol string, priori
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+
 	fmt.Println("Home Handler")
 	init := [][]int{{1, 2, 3}, {4, 0, 5}, {7, 8, 6}}
 	goal := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
@@ -152,6 +153,10 @@ func manhattanDistance(targetTile, vertPosition, HorzPosition int, board [][]int
 	return -1, errors.New("Can't find target tile")
 }
 
+func notFoundHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+}
+
 func main() {
 
 	fmt.Println("Hello AI")
@@ -163,6 +168,7 @@ func main() {
 
 	fmt.Println("Running http://localhost:8000/")
 	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/favicon.ico", notFoundHandler)
 	http.ListenAndServe(":8000", nil)
 }
 
