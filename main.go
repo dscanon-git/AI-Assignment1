@@ -191,7 +191,7 @@ func solve(goal, init [][]int, blank []int) State { // return []Step
 
 		hParent := heuristicFn(goal, tmp.board)
 		hNext := heuristicFn(goal, currentState.board)
-		deltaH := float64(hParent - hNext)
+		deltaH := float64(hNext - hParent)
 		//		fmt.Println("deltaH=", hParent, "-", hNext, "=", deltaH)
 
 		if deltaH > 0 {
@@ -202,11 +202,12 @@ func solve(goal, init [][]int, blank []int) State { // return []Step
 			thresholdProb := math.Pow(E, deltaH/float64(t)) // TODO : Check what this value should really be
 
 			if rndProb > thresholdProb {
-				//				fmt.Println(">>prob pass", deltaH, ":", rndProb, ">", thresholdProb)
+				fmt.Println(">>prob pass", deltaH, ":", rndProb, ">", thresholdProb)
 				currentState = &tmp
 			} else {
-				//				fmt.Println("prob fail", deltaH, ":", rndProb, "**", thresholdProb)
+				fmt.Println("prob fail", deltaH, ":", rndProb, "**", thresholdProb)
 			}
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 	return State{} // For test only must change!!!
