@@ -1,7 +1,6 @@
 package main
 
 import (
-	"container/heap"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -23,47 +22,9 @@ type Step struct {
 	Direction string
 }
 type State struct {
-	board    [][]int
-	blank    []int
-	sol      string
-	priority int
-	index    int
-}
-
-type PQ []*State
-
-func (pq PQ) Len() int { return len(pq) }
-
-func (pq PQ) Less(i, j int) bool {
-	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return pq[i].priority < pq[j].priority
-}
-func (pq PQ) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
-	pq[i].index = i
-	pq[j].index = j
-}
-
-func (pq *PQ) Push(x interface{}) {
-	n := len(*pq)
-	item := x.(*State)
-	item.index = n
-	*pq = append(*pq, item)
-}
-
-func (pq *PQ) Pop() interface{} {
-	old := *pq
-	n := len(old)
-	item := old[n-1]
-	item.index = -1 // for safety
-	*pq = old[0 : n-1]
-	return item
-}
-
-func (pq *PQ) update(item *State, board [][]int, blank []int, sol string, priority int) {
-	item.board = board
-	item.priority = priority
-	heap.Fix(pq, item.index)
+	board [][]int
+	blank []int
+	sol   string
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -74,14 +35,20 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	blank := []int{1, 1}
 
 	fmt.Println("==========START===========")
-	init, blank = randomPuzzle(init, blank, 50)
+	init, blank = randomPuzzle(init, blank, 40)
 	start := copyBoard(init)
-	// fmt.Println("===========BFS===========")
-	sol := aStar(goal, init, blank)
+
+	print(init)
+	sol := solve(goal, init, blank)
 	fmt.Println("Solution : ", sol.sol)
+	if len(sol.sol) == 0 {
+		fmt.Println("Can't solve")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 	step, tile := changeBlanktoTile(init, blank, sol.sol)
 	solutionJson := returnToFront(start, step, tile)
-	fmt.Println(solutionJson)
+	//fmt.Println(solutionJson)
 	fmt.Println("******Goal******", goal)
 	jsonData := struct {
 		Json string
@@ -97,11 +64,10 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 // ActualCost ( is len(sol) - length of sol string ) is real cost that increase (+1) when move to next state
 // Return : return value is HeuristicCost (NOT a actual cost)
 func evalFn(goal, now [][]int, actualCost int) int {
-	// Todo : Need to reconstruc new way of HashMap use
 
 	// f(x) = g(x)+h(x) = realCost + heuristicCost
 	heuristicCost := heuristicFn(goal, now)
-	hFactor := 1 // Todo : Need to adjust this value to speed up and optimize result path (result is not optimal)
+	hFactor := 1
 	return actualCost + 1 + hFactor*heuristicCost
 }
 
@@ -160,108 +126,94 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	fmt.Println("Hello AI")
-	init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
-	goal := [][]int{{0, 2, 3}, {4, 5, 6}, {7, 8, 1}}
+	// init := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
+	// goal := [][]int{{0, 2, 3}, {4, 5, 6}, {7, 8, 1}}
 
-	fmt.Println("h1 ", h1(goal, init))
-	fmt.Println("h2 ", h2(goal, init))
+	// fmt.Println("h1 ", h1(goal, init))
+	// fmt.Println("h2 ", h2(goal, init))
 
 	fmt.Println("Running http://localhost:8000/")
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/favicon.ico", notFoundHandler)
 	http.ListenAndServe(":8000", nil)
 }
+func rndMove(blank []int) string {
+	seed := rand.NewSource(time.Now().UnixNano())
+	rnd := rand.New(seed)
+	var directionRune []rune
 
-// BFS Call this
-func aStar(goal, init [][]int, blank []int) State { // return []Step
-	var stateMap map[string]int = make(map[string]int)
-	//	var stateQ []State = make([]State, 1)
-	stateQ := make(PQ, 0)
-	heap.Init(&stateQ)
-	state := new(State)
-	state.board = init
-	state.sol = ""
-	state.blank = blank
-	state.priority = 0
-	fmt.Println("StateQ : ", &stateQ)
-	fmt.Println("state :", state)
-	heap.Push(&stateQ, state)
-	fmt.Println("HEAP HEAP")
-	//	stateQ[0].board = init
-	//	stateQ[0].sol = ""
-	//	stateQ[0].blank = blank
-	//fmt.Println(stateQ)
-	//for {
-	for {
-		//		fmt.Println("All heap: ", stateQ)
-		// Dequeue, check with goal
-		temp := heap.Pop(&stateQ).(*State)
-		fmt.Println(temp)
-		fmt.Println(temp.board)
-		if checkIdentical(temp.board, goal) {
-			//fmt.Println("---------------SUCCESS------------------")
-			//fmt.Println(stateQ[q])
-			//print(stateQ[q].board)
-			return *temp
+	if blank[0] != 0 {
+		directionRune = append(directionRune, 'U')
+	}
+	if blank[0] != 2 {
+		directionRune = append(directionRune, 'D')
+	}
+	if blank[1] != 0 {
+		directionRune = append(directionRune, 'L')
+	}
+	if blank[1] != 2 {
+		directionRune = append(directionRune, 'R')
+	}
+	//fmt.Println("D-RUNE ", directionRune)
+	return string(directionRune[rnd.Intn(len(directionRune))])
+}
+func solve(goal, init [][]int, blank []int) State { // return []Step
+	var hashMap map[string]int = make(map[string]int)
+	// Const E=......
+	var E = 2.718 // TODO
+
+	currentState := new(State)
+	currentState.board = init
+	currentState.sol = ""
+	currentState.blank = blank
+	seed := rand.NewSource(time.Now().UnixNano())
+	rnd := rand.New(seed)
+
+	for t := 0; t < 10000000; t++ {
+		//time.Sleep(100 * time.Millisecond)
+		if checkIdentical(currentState.board, goal) {
+			fmt.Println("---------------SUCCESS------------------")
+			return *currentState
 		}
-		// Move UDLR , Enqueue
-		if u, err := aStarMove(temp, "U"); err == nil {
-			u.priority = evalFn(goal, u.board, len(u.sol))
-			stateQ = aStarAppend(stateQ, stateMap, u)
+		// Rand UDLR
+		var rndDirection string
+		var tmp State
+		for {
+			rndDirection = rndMove(currentState.blank)
+			var err error
+			if tmp, err = solveMove(currentState, rndDirection, hashMap); err == nil {
+				//				fmt.Println()
+				break
+			}
+			fmt.Print("X")
 		}
-		if d, err := aStarMove(temp, "D"); err == nil {
-			d.priority = evalFn(goal, d.board, len(d.sol))
-			stateQ = aStarAppend(stateQ, stateMap, d)
-		}
-		if l, err := aStarMove(temp, "L"); err == nil {
-			l.priority = evalFn(goal, l.board, len(l.sol))
-			stateQ = aStarAppend(stateQ, stateMap, l)
-		}
-		if r, err := aStarMove(temp, "R"); err == nil {
-			r.priority = evalFn(goal, r.board, len(r.sol))
-			stateQ = aStarAppend(stateQ, stateMap, r)
+		//		fmt.Println("T:", t, "@", len(currentState.sol), " Dir:", rndDirection)
+
+		hParent := heuristicFn(goal, tmp.board)
+		hNext := heuristicFn(goal, currentState.board)
+		deltaH := float64(hParent - hNext)
+		//		fmt.Println("deltaH=", hParent, "-", hNext, "=", deltaH)
+
+		if deltaH > 0 {
+			//			fmt.Println(">>deltaH pass", deltaH)
+			currentState = &tmp
+		} else {
+			rndProb := rnd.Float64()
+			thresholdProb := math.Pow(E, deltaH/float64(t)) // TODO : Check what this value should really be
+
+			if rndProb > thresholdProb {
+				//				fmt.Println(">>prob pass", deltaH, ":", rndProb, ">", thresholdProb)
+				currentState = &tmp
+			} else {
+				//				fmt.Println("prob fail", deltaH, ":", rndProb, "**", thresholdProb)
+			}
 		}
 	}
-	//fmt.Println(stateQ)
 	return State{} // For test only must change!!!
 }
 
-func aStarAppend(stateQ PQ, hashMap map[string]int, newState State) PQ {
-	//If this state was past before then will not append its
-	key := fmt.Sprint(newState.board)
-	passedLv := hashMap[key]
-	if len(newState.sol) > passedLv && passedLv != 0 {
-		fmt.Println("was passed on shorter path.")
-		return stateQ
-	}
-	fmt.Println("current :  ", len(newState.sol), "past", passedLv)
-	hashMap[key] = len(newState.sol)
-	//return append(stateQ, &newState)
-	heap.Push(&stateQ, &newState)
-	return stateQ
-}
+func solveMove(s *State, dir string, hashMap map[string]int) (State, error) {
 
-func aStarMove(s *State, dir string) (State, error) {
-	//fmt.Println("--------BFS-Gen :", dir)
-	//print(s.board)
-	// Check what is last move and not to counter it
-	// ie. if last what U then not D (return err)
-	if s.sol[len(s.sol):] == "U" && dir == "D" {
-		fmt.Println("No counter move")
-		return State{}, errors.New("No counter")
-	}
-	if s.sol[len(s.sol):] == "D" && dir == "U" {
-		fmt.Println("No counter move")
-		return State{}, errors.New("No counter")
-	}
-	if s.sol[len(s.sol):] == "L" && dir == "R" {
-		fmt.Println("No counter move")
-		return State{}, errors.New("No counter")
-	}
-	if s.sol[len(s.sol):] == "R" && dir == "L" {
-		fmt.Println("No counter move")
-		return State{}, errors.New("No counter")
-	}
 	// Next move
 	board := copyBoard(s.board)
 	blank := copyBlank(s.blank)
@@ -270,6 +222,16 @@ func aStarMove(s *State, dir string) (State, error) {
 		//fmt.Println("Can't move!!!!!")
 		return State{}, errors.New("Can't move")
 	}
+
+	// Check in hashmap
+	//key := fmt.Sprint(board)
+	//passed := hashMap[key]
+	//if passed == 1 {
+	//	fmt.Println("Passed")
+	//	return State{}, errors.New("Passed")
+	//}
+	//hashMap[key] = 1
+
 	sol := s.sol + dir
 	return State{board: board, blank: blank, sol: sol}, err
 }
@@ -310,7 +272,7 @@ func move(board [][]int, blank []int, direction string) ([][]int, []int, error) 
 			moveR(newBoard, newBlank)
 		}
 	} else {
-		fmt.Println("can't move.")
+		//fmt.Println("can't move.")
 		return newBoard, newBlank, errors.New("Can't move")
 	}
 	//fmt.Println("New Board")
@@ -431,7 +393,7 @@ func returnToFront(board [][]int, step []string, tile []int) string {
 		Sequence: arrStep,
 	}
 	jsonres, _ := json.Marshal(res)
-	//	fmt.Println(string(jsonres))
+	//fmt.Println(string(jsonres))
 	return string(jsonres)
 }
 
