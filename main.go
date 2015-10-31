@@ -28,28 +28,24 @@ type State struct {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Println("Home Handler")
+	fmt.Println("==========START===========")
 	init := [][]int{{1, 2, 3}, {4, 0, 5}, {7, 8, 6}}
 	goal := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}}
 	blank := []int{1, 1}
-
-	fmt.Println("==========START===========")
 	init, blank = randomPuzzle(init, blank, 40)
 	start := copyBoard(init)
 
-	print(init)
 	sol := solve(goal, init, blank)
-	fmt.Println("Solution : ", sol.sol)
 	if len(sol.sol) == 0 {
 		fmt.Println("Can't solve")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+	fmt.Println("#", init)
+	fmt.Println("#Solution : ", sol.sol)
 	step, tile := changeBlanktoTile(init, blank, sol.sol)
 	solutionJson := returnToFront(start, step, tile)
 	//fmt.Println(solutionJson)
-	fmt.Println("******Goal******", goal)
 	jsonData := struct {
 		Json string
 	}{
@@ -157,8 +153,8 @@ func rndMove(blank []int) string {
 	//fmt.Println("D-RUNE ", directionRune)
 	return string(directionRune[rnd.Intn(len(directionRune))])
 }
-func solve(goal, init [][]int, blank []int) State { // return []Step
-	E := 2.718 // TODO
+func solve(goal, init [][]int, blank []int) State {
+	E := 2.718
 
 	currentState := new(State)
 	currentState.board = init
@@ -170,7 +166,7 @@ func solve(goal, init [][]int, blank []int) State { // return []Step
 	for t := 0; t < 10000000; t++ {
 		if checkIdentical(currentState.board, goal) {
 			fmt.Println("---------------SUCCESS------------------")
-			fmt.Println("@t=", t)
+			fmt.Println("#t=", t)
 			return *currentState
 		}
 		var rndDirection string
@@ -181,7 +177,6 @@ func solve(goal, init [][]int, blank []int) State { // return []Step
 			if tmp, err = solveMove(currentState, rndDirection); err == nil {
 				break
 			}
-			fmt.Println("X")
 		}
 		//		fmt.Println("T:", t, "@", len(currentState.sol), " Dir:", rndDirection)
 
@@ -210,7 +205,6 @@ func solve(goal, init [][]int, blank []int) State { // return []Step
 
 func solveMove(s *State, dir string) (State, error) {
 
-	// Next move
 	board := copyBoard(s.board)
 	blank := copyBlank(s.blank)
 	board, blank, err := move(board, blank, dir)
@@ -244,9 +238,6 @@ func move(board [][]int, blank []int, direction string) ([][]int, []int, error) 
 	dir := strings.ToUpper(direction)
 	newBoard := copyBoard(board)
 	newBlank := copyBlank(blank)
-	//fmt.Println("Direction : ", dir)
-	//print(newBoard)
-	//fmt.Println("Blank :", newBlank)
 	if canMove(newBlank, dir) {
 		switch dir {
 		case "U":
@@ -262,10 +253,6 @@ func move(board [][]int, blank []int, direction string) ([][]int, []int, error) 
 		//fmt.Println("can't move.")
 		return newBoard, newBlank, errors.New("Can't move")
 	}
-	//fmt.Println("New Board")
-	//print(newBoard)
-	//fmt.Println("New Blank:", newBlank)
-	//fmt.Println("=========================")
 	return newBoard, newBlank, nil
 }
 
