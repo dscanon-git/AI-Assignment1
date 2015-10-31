@@ -158,9 +158,7 @@ func rndMove(blank []int) string {
 	return string(directionRune[rnd.Intn(len(directionRune))])
 }
 func solve(goal, init [][]int, blank []int) State { // return []Step
-	var hashMap map[string]int = make(map[string]int)
-	// Const E=......
-	var E = 2.718 // TODO
+	E := 2.718 // TODO
 
 	currentState := new(State)
 	currentState.board = init
@@ -170,22 +168,18 @@ func solve(goal, init [][]int, blank []int) State { // return []Step
 	rnd := rand.New(seed)
 
 	for t := 0; t < 10000000; t++ {
-		//time.Sleep(100 * time.Millisecond)
 		if checkIdentical(currentState.board, goal) {
 			fmt.Println("---------------SUCCESS------------------")
 			return *currentState
 		}
-		// Rand UDLR
 		var rndDirection string
 		var tmp State
 		for {
 			rndDirection = rndMove(currentState.blank)
 			var err error
-			if tmp, err = solveMove(currentState, rndDirection, hashMap); err == nil {
-				//				fmt.Println()
+			if tmp, err = solveMove(currentState, rndDirection); err == nil {
 				break
 			}
-			fmt.Print("X")
 		}
 		//		fmt.Println("T:", t, "@", len(currentState.sol), " Dir:", rndDirection)
 
@@ -199,21 +193,21 @@ func solve(goal, init [][]int, blank []int) State { // return []Step
 			currentState = &tmp
 		} else {
 			rndProb := rnd.Float64()
-			thresholdProb := math.Pow(E, deltaH/float64(t)) // TODO : Check what this value should really be
+			thresholdProb := math.Pow(E, deltaH/float64(t))
 
 			if rndProb > thresholdProb {
-				fmt.Println(">>prob pass", deltaH, ":", rndProb, ">", thresholdProb)
+				//fmt.Println(">>prob pass", deltaH, ":", rndProb, ">", thresholdProb)
 				currentState = &tmp
 			} else {
-				fmt.Println("prob fail", deltaH, ":", rndProb, "**", thresholdProb)
+				//fmt.Println("prob fail", deltaH, ":", rndProb, "**", thresholdProb)
 			}
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
-	return State{} // For test only must change!!!
+	return State{}
 }
 
-func solveMove(s *State, dir string, hashMap map[string]int) (State, error) {
+func solveMove(s *State, dir string) (State, error) {
 
 	// Next move
 	board := copyBoard(s.board)
@@ -223,15 +217,6 @@ func solveMove(s *State, dir string, hashMap map[string]int) (State, error) {
 		//fmt.Println("Can't move!!!!!")
 		return State{}, errors.New("Can't move")
 	}
-
-	// Check in hashmap
-	//key := fmt.Sprint(board)
-	//passed := hashMap[key]
-	//if passed == 1 {
-	//	fmt.Println("Passed")
-	//	return State{}, errors.New("Passed")
-	//}
-	//hashMap[key] = 1
 
 	sol := s.sol + dir
 	return State{board: board, blank: blank, sol: sol}, err
