@@ -170,6 +170,7 @@ func solve(goal, init [][]int, blank []int) State { // return []Step
 	for t := 0; t < 10000000; t++ {
 		if checkIdentical(currentState.board, goal) {
 			fmt.Println("---------------SUCCESS------------------")
+			fmt.Println("@t=", t)
 			return *currentState
 		}
 		var rndDirection string
@@ -180,6 +181,7 @@ func solve(goal, init [][]int, blank []int) State { // return []Step
 			if tmp, err = solveMove(currentState, rndDirection); err == nil {
 				break
 			}
+			fmt.Println("X")
 		}
 		//		fmt.Println("T:", t, "@", len(currentState.sol), " Dir:", rndDirection)
 
@@ -201,7 +203,6 @@ func solve(goal, init [][]int, blank []int) State { // return []Step
 			} else {
 				//fmt.Println("prob fail", deltaH, ":", rndProb, "**", thresholdProb)
 			}
-			time.Sleep(100 * time.Millisecond)
 		}
 	}
 	return State{}
