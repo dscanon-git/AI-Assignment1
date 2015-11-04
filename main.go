@@ -163,7 +163,7 @@ func solve(goal, init [][]int, blank []int) State {
 	seed := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(seed)
 
-	for t := 0; t < 10000000; t++ {
+	for t := 1000000; t > 0; t-- {
 		if checkIdentical(currentState.board, goal) {
 			fmt.Println("---------------SUCCESS------------------")
 			fmt.Println("#t=", t)
@@ -180,8 +180,8 @@ func solve(goal, init [][]int, blank []int) State {
 		}
 		//		fmt.Println("T:", t, "@", len(currentState.sol), " Dir:", rndDirection)
 
-		hParent := heuristicFn(goal, tmp.board)
-		hNext := heuristicFn(goal, currentState.board)
+		hNext := heuristicFn(goal, tmp.board)
+		hParent := heuristicFn(goal, currentState.board)
 		deltaH := float64(hNext - hParent)
 		//		fmt.Println("deltaH=", hParent, "-", hNext, "=", deltaH)
 
@@ -192,8 +192,8 @@ func solve(goal, init [][]int, blank []int) State {
 			rndProb := rnd.Float64()
 			thresholdProb := math.Pow(E, deltaH/float64(t))
 
-			if rndProb > thresholdProb {
-				//fmt.Println(">>prob pass", deltaH, ":", rndProb, ">", thresholdProb)
+			if rndProb < thresholdProb {
+				//fmt.Println(">>prob pass", deltaH, ":", rndProb, "<", thresholdProb)
 				currentState = &tmp
 			} else {
 				//fmt.Println("prob fail", deltaH, ":", rndProb, "**", thresholdProb)
